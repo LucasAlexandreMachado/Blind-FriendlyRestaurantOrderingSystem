@@ -1,187 +1,185 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Totem de Autoatendimento Acessível</title>
-    
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <title>Totem Autoatendimento — Sabor & Arte</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div id="app" class="app">
-        <!-- Tela Inicial -->
-        <div id="telaInicial" class="tela-cheia">
-            <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100 tela-inicial">
-                <div class="text-center">
-                    <div class="logo-grande mb-5">
-                        <i class="bi bi-cup-hot"></i>
-                    </div>
-                    <h1 class="titulo-principal mb-2">RESTAURANTE DELÍCIA</h1>
-                    <p class="subtitulo-principal mb-5">Bem-vindo ao Totem de Pedidos</p>
-                    
-                    <div class="d-flex gap-4 justify-content-center flex-wrap">
-                        <button id="btnIniciar" class="btn btn-primary btn-lg botao-grande">
-                            <i class="bi bi-play-fill me-2"></i> Iniciar Pedido
-                        </button>
-                        
-                        <button id="btnAcessivel" class="btn btn-warning btn-lg botao-grande">
-                            <i class="bi bi-universal-access me-2"></i> Modo Acessível
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Tela de Navegação -->
-        <div id="telaNavegacao" class="tela-cheia hidden">
-            <nav class="navbar navbar-expand navbar-dark bg-dark sticky-top">
-                <div class="container-fluid">
-                    <span class="navbar-brand mb-0 h1">
-                        <i class="bi bi-cup-hot"></i> Restaurante Delícia
-                    </span>
-                    <div class="ms-auto d-flex gap-2 align-items-center">
-                        <button id="btnVoltar" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-arrow-left"></i> Voltar
-                        </button>
-                        <button id="carrinhoFlutante" class="btn btn-light position-relative hidden" title="Ver carrinho">
-                            <i class="bi bi-cart3"></i>
-                            <span id="contadorCarrinho" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            <div class="container-fluid flex-grow-1 d-flex flex-column py-4">
-                <!-- Menu de Categorias -->
-                <div id="menuCategorias" class="menu-container hidden">
-                    <h2 class="mb-4 text-center">
-                        <i class="bi bi-list-check"></i> Selecione uma Categoria
-                    </h2>
-                    <div id="listaCategorias" class="row g-3">
-                        <!-- Preenchido dinamicamente -->
-                    </div>
-                </div>
-
-                <!-- Menu de Produtos -->
-                <div id="menuProdutos" class="menu-container hidden">
-                    <h2 class="mb-4 text-center">
-                        <i class="bi bi-shop"></i> <span id="tituloCategoriaAtual">Produtos</span>
-                    </h2>
-                    <div id="listaProdutos" class="row g-3">
-                        <!-- Preenchido dinamicamente -->
-                    </div>
-                </div>
-
-                <!-- Carrinho -->
-                <div id="menuCarrinho" class="menu-container hidden">
-                    <h2 class="mb-4 text-center">
-                        <i class="bi bi-bag-check"></i> Seu Carrinho
-                    </h2>
-                    <div id="listaCarrinho" class="row g-3 mb-4">
-                        <!-- Preenchido dinamicamente -->
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 ms-auto">
-                            <div class="card bg-light border-warning">
-                                <div class="card-body">
-                                    <h5 class="card-title">Resumo</h5>
-                                    <div class="d-flex justify-content-between align-items-center fs-4">
-                                        <span>Total:</span>
-                                        <span class="text-warning fw-bold">R$ <span id="totalCarrinho">0.00</span></span>
-                                    </div>
-                                    <button id="btnFinalizarCarrinho" class="btn btn-success w-100 mt-3 btn-lg">
-                                        <i class="bi bi-check-circle"></i> Continuar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Revisão de Pedido -->
-                <div id="menuRevisao" class="menu-container hidden">
-                    <h2 class="mb-4 text-center">
-                        <i class="bi bi-clipboard-check"></i> Resumo do Pedido
-                    </h2>
-                    <div id="listaRevisao" class="row g-3 mb-4">
-                        <!-- Preenchido dinamicamente -->
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 ms-auto">
-                            <div class="card bg-success text-white">
-                                <div class="card-body">
-                                    <h5 class="card-title">Total do Pedido</h5>
-                                    <div class="d-flex justify-content-between align-items-center fs-4 mb-3">
-                                        <span>Total:</span>
-                                        <span class="fw-bold">R$ <span id="totalRevisao">0.00</span></span>
-                                    </div>
-                                    <button id="btnConfirmarPedido" class="btn btn-light w-100 btn-lg fw-bold">
-                                        <i class="bi bi-check-lg"></i> Finalizar Pedido
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pedido Finalizado -->
-                <div id="menuFinalizado" class="menu-container hidden">
-                    <div class="text-center py-5">
-                        <div class="display-1 text-success mb-4">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                        <h2 class="mb-3">Pedido Finalizado!</h2>
-                        <p class="lead mb-4">Seu pedido foi registrado com sucesso.</p>
-                        
-                        <div class="card bg-light border-success mb-4" style="max-width: 400px; margin: 0 auto;">
-                            <div class="card-body">
-                                <p class="card-text mb-0">
-                                    <span class="text-muted">Número do Pedido:</span>
-                                </p>
-                                <h3 class="text-success mb-3" id="numeroPedido">Pedido #0000</h3>
-                                
-                                <hr>
-                                
-                                <p class="card-text mb-0">
-                                    <span class="text-muted">Tempo Estimado:</span>
-                                </p>
-                                <p class="lead mb-0">
-                                    <i class="bi bi-clock"></i> 15 minutos
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <button id="btnNovoCarrinho" class="btn btn-primary btn-lg">
-                            <i class="bi bi-arrow-repeat"></i> Fazer Novo Pedido
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Controle de Modo Acessível -->
-        <div id="botaoModoAcessivel" class="modo-acessivel-container hidden">
-            <div id="indicadorVisual" class="indicador-visual-acessivel">
-                <div id="conteudoIndicador" class="conteudo-indicador">
-                    <!-- Conteúdo será atualizado dinamicamente -->
-                </div>
-            </div>
-            
-            <button id="btnBotaoUnico" class="botao-unico-acessivel">
-                <span class="visual-click">Clique ou segure</span>
-            </button>
-            
-            <div id="indicadorAcao" class="indicador-acao-visual"></div>
-        </div>
+<!-- ═══════════════════════════════════════════════
+     TELA 0 — BOAS-VINDAS
+═══════════════════════════════════════════════ -->
+<div id="tela-welcome" class="tela ativa">
+  <div class="welcome-bg">
+    <div class="welcome-overlay"></div>
+  </div>
+  <div class="welcome-content">
+    <div class="logo-area">
+      <div class="logo-icon">🍽️</div>
+      <h1 class="logo-nome">Sabor <span>&amp;</span> Arte</h1>
+      <p class="logo-slogan">Experiência gastronômica do seu jeito</p>
     </div>
+    <div class="welcome-actions">
+      <button class="btn-primary btn-giant" id="btn-iniciar" onclick="iniciarPedido()">
+        <span class="btn-icon">▶</span>
+        Iniciar Pedido
+      </button>
+      <button class="btn-acessivel" id="btn-modo-acessivel" onclick="ativarModoAcessivel()">
+        <span class="braille-icon">⠿</span>
+        Modo Acessível
+      </button>
+    </div>
+    <p class="welcome-hint">Toque na tela para começar</p>
+  </div>
+</div>
 
-    <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script>
+<!-- ═══════════════════════════════════════════════
+     TELA 1 — CATEGORIAS
+═══════════════════════════════════════════════ -->
+<div id="tela-categorias" class="tela">
+  <header class="topbar">
+    <button class="btn-voltar" onclick="voltarParaWelcome()">← Início</button>
+    <div class="topbar-title">Cardápio</div>
+    <button class="btn-carrinho" onclick="irParaCarrinho()">
+      🛒 <span id="contador-carrinho">0</span>
+    </button>
+  </header>
+  <main class="categorias-grid" id="categorias-grid"></main>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TELA 2 — PRODUTOS
+═══════════════════════════════════════════════ -->
+<div id="tela-produtos" class="tela">
+  <header class="topbar">
+    <button class="btn-voltar" onclick="irParaCategorias()">← Voltar</button>
+    <div class="topbar-title" id="titulo-categoria"></div>
+    <button class="btn-carrinho" onclick="irParaCarrinho()">
+      🛒 <span id="contador-carrinho-2">0</span>
+    </button>
+  </header>
+  <main class="produtos-grid" id="produtos-grid"></main>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TELA 3 — CARRINHO
+═══════════════════════════════════════════════ -->
+<div id="tela-carrinho" class="tela">
+  <header class="topbar">
+    <button class="btn-voltar" onclick="irParaCategorias()">← Cardápio</button>
+    <div class="topbar-title">Seu Pedido</div>
+    <div class="topbar-spacer"></div>
+  </header>
+  <main class="carrinho-layout">
+    <div class="carrinho-lista" id="carrinho-lista"></div>
+    <div class="carrinho-resumo">
+      <div class="resumo-card">
+        <h2>Resumo do Pedido</h2>
+        <div class="resumo-linha">
+          <span>Subtotal</span>
+          <span id="resumo-subtotal">R$ 0,00</span>
+        </div>
+        <div class="resumo-linha resumo-total">
+          <span>Total</span>
+          <span id="resumo-total">R$ 0,00</span>
+        </div>
+        <button class="btn-primary btn-finalizar" onclick="irParaConfirmacao()">
+          ✔ Finalizar Pedido
+        </button>
+        <button class="btn-secondary" onclick="irParaCategorias()">
+          + Adicionar Mais Itens
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TELA 4 — CONFIRMAÇÃO
+═══════════════════════════════════════════════ -->
+<div id="tela-confirmacao" class="tela">
+  <header class="topbar">
+    <button class="btn-voltar" onclick="irParaCarrinho()">← Carrinho</button>
+    <div class="topbar-title">Confirmar Pedido</div>
+    <div class="topbar-spacer"></div>
+  </header>
+  <main class="confirmacao-layout">
+    <div class="confirmacao-card">
+      <h2>Revise seu pedido antes de finalizar</h2>
+      <div id="confirmacao-lista"></div>
+      <div class="confirmacao-total">
+        <span>Total a pagar:</span>
+        <strong id="confirmacao-total-val">R$ 0,00</strong>
+      </div>
+      <div class="confirmacao-acoes">
+        <button class="btn-secondary" onclick="irParaCarrinho()">Editar Pedido</button>
+        <button class="btn-primary btn-confirmar" onclick="finalizarPedido()">✔ Confirmar e Pagar</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TELA 5 — SUCESSO
+═══════════════════════════════════════════════ -->
+<div id="tela-sucesso" class="tela">
+  <div class="sucesso-content">
+    <div class="sucesso-icon">✔</div>
+    <h1>Pedido Realizado!</h1>
+    <div class="sucesso-numero">Número: <strong id="numero-pedido">#001</strong></div>
+    <p>Aguarde ser chamado no balcão.</p>
+    <button class="btn-primary btn-giant" onclick="novoAtendimento()">
+      Novo Atendimento
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     OVERLAY — MODO ACESSÍVEL
+═══════════════════════════════════════════════ -->
+<div id="overlay-acessivel" class="overlay-acessivel hidden">
+  <div class="acessivel-header">
+    <div class="acessivel-badge">⠿ MODO ACESSÍVEL ATIVO</div>
+    <button class="btn-sair-acessivel" onclick="sairModoAcessivel()">✕ Sair</button>
+  </div>
+
+  <div class="acessivel-tela" id="acessivel-tela">
+    <div class="acessivel-status" id="acessivel-status">Bem-vindo</div>
+    <div class="acessivel-item-atual" id="acessivel-item-atual">
+      Pressione o botão para navegar
+    </div>
+    <div class="acessivel-descricao" id="acessivel-descricao"></div>
+  </div>
+
+  <div class="acessivel-controles">
+    <div class="controle-instrucoes">
+      <div class="instrucao"><kbd>Clique curto</kbd> Próxima opção</div>
+      <div class="instrucao"><kbd>Clique longo</kbd> Selecionar</div>
+      <div class="instrucao"><kbd>Duplo clique</kbd> Voltar</div>
+    </div>
+    <button
+      id="btn-navegacao"
+      class="btn-navegacao"
+      onpointerdown="iniciarPressao(event)"
+      onpointerup="liberarPressao(event)"
+      onpointercancel="liberarPressao(event)"
+    >
+      ●
+    </button>
+  </div>
+
+  <div class="acessivel-carrinho-info" id="acessivel-carrinho-info">
+    🛒 <span id="acessivel-qtd">0</span> itens — Total: <span id="acessivel-total">R$ 0,00</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TOAST FEEDBACK VISUAL
+═══════════════════════════════════════════════ -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
 </body>
 </html>

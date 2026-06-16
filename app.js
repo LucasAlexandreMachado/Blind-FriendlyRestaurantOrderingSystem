@@ -1,704 +1,614 @@
-/**
- * TOTEM DE AUTOATENDIMENTO ACESSÍVEL
- * Sistema de pedidos para restaurantes com foco em acessibilidade
- */
+/* ════════════════════════════════════════════════════════
+   TOTEM DE AUTOATENDIMENTO — Sabor & Arte
+   IHC — Interação Humano-Computador
+   JavaScript Vanilla + Web Speech API
+════════════════════════════════════════════════════════ */
 
-// ===== ESTADO GLOBAL =====
-const state = {
-    modoAcessivel: false,
-    telaAtual: 'inicial',
-    dados: null,
-    categoriaAtual: 0,
-    produtoAtual: 0,
-    carrinho: [],
-    pedidoFinal: null,
-    
-    // Modo acessível
-    posicaoNavegacao: 0,
-    tempoClick: 0,
-    clickAtivo: false,
+'use strict';
+
+/* ── Estado global ── */
+let cardapio       = null;
+let carrinho       = [];          // [{nome, preco, qtd}]
+let telaAtual      = 'welcome';
+let modoAcessivel  = false;
+
+/* ── Estado do modo acessível ── */
+const AC = {
+  fase: 'categorias',            // 'categorias' | 'produtos' | 'carrinho' | 'confirmar'
+  catIdx:   0,
+  prodIdx:  0,
+  itemIdx:  0,
+  categoriaAtual: null,
 };
 
-// ===== ELEMENTS DOM =====
-const elements = {
-    app: document.getElementById('app'),
-    telaInicial: document.getElementById('telaInicial'),
-    telaNavegacao: document.getElementById('telaNavegacao'),
-    menuCategorias: document.getElementById('menuCategorias'),
-    menuProdutos: document.getElementById('menuProdutos'),
-    menuCarrinho: document.getElementById('menuCarrinho'),
-    menuRevisao: document.getElementById('menuRevisao'),
-    menuFinalizado: document.getElementById('menuFinalizado'),
-    btnIniciar: document.getElementById('btnIniciar'),
-    btnAcessivel: document.getElementById('btnAcessivel'),
-    btnVoltar: document.getElementById('btnVoltar'),
-    btnBotaoUnico: document.getElementById('btnBotaoUnico'),
-    carrinhoFlutante: document.getElementById('carrinhoFlutante'),
-    contadorCarrinho: document.getElementById('contadorCarrinho'),
-    botaoModoAcessivel: document.getElementById('botaoModoAcessivel'),
-    indicadorVisual: document.querySelector('.indicador-visual-acessivel'),
-    indicadorAcao: document.getElementById('indicadorAcao'),
-    listaCategorias: document.getElementById('listaCategorias'),
-    listaProdutos: document.getElementById('listaProdutos'),
-    listaCarrinho: document.getElementById('listaCarrinho'),
-    listaRevisao: document.getElementById('listaRevisao'),
-    tituloCategoriaAtual: document.getElementById('tituloCategoriaAtual'),
-    numeroPedido: document.getElementById('numeroPedido'),
-    btnFinalizarCarrinho: document.getElementById('btnFinalizarCarrinho'),
-    btnConfirmarPedido: document.getElementById('btnConfirmarPedido'),
-    btnNovoCarrinho: document.getElementById('btnNovoCarrinho'),
-};
+/* ── Pressão do botão único ── */
+let pressaoTimer   = null;
+let pressaoInicio  = 0;
+const LONGO_MS     = 600;
 
-// ===== WEB SPEECH API =====
-const synth = window.speechSynthesis;
+/* ════════════════════════════════════════════════════════
+   INICIALIZAÇÃO
+════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  await carregarCardapio();
+  mostrarTela('welcome');
+});
 
-function falar(texto) {
-    // Cancelar áudio anterior se estiver tocando
-    if (synth.speaking) {
-        synth.cancel();
-    }
-    
-    const utterance = new SpeechSynthesisUtterance(texto);
-    utterance.lang = 'pt-BR';
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    
-    synth.speak(utterance);
+async function carregarCardapio() {
+  try {
+    const r = await fetch('cardapio.json');
+    cardapio = await r.json();
+  } catch (e) {
+    console.error('Erro ao carregar cardápio:', e);
+  }
 }
 
-function pararAudio() {
-    synth.cancel();
+/* ════════════════════════════════════════════════════════
+   NAVEGAÇÃO DE TELAS
+════════════════════════════════════════════════════════ */
+function mostrarTela(id) {
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+  const el = document.getElementById(`tela-${id}`);
+  if (el) el.classList.add('ativa');
+  telaAtual = id;
 }
 
-// ===== CARREGAMENTO DE DADOS =====
-async function carregarDados() {
-    try {
-        const response = await fetch('produtos.json');
-        const dados = await response.json();
-        state.dados = dados;
-        return dados;
-    } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        state.dados = { categorias: [] };
-    }
+function voltarParaWelcome() {
+  mostrarTela('welcome');
 }
 
-// ===== INICIALIZAÇÃO =====
-async function inicializar() {
-    await carregarDados();
-    
-    // Event Listeners - Tela Inicial
-    elements.btnIniciar.addEventListener('click', iniciarModoNormal);
-    elements.btnAcessivel.addEventListener('click', iniciarModoAcessivel);
-    
-    // Event Listeners - Navegação Normal
-    elements.btnVoltar.addEventListener('click', voltarTelaAnterior);
-    elements.carrinhoFlutante.addEventListener('click', irParaCarrinho);
-    elements.btnFinalizarCarrinho.addEventListener('click', irParaRevisao);
-    elements.btnConfirmarPedido.addEventListener('click', finalizarPedido);
-    elements.btnNovoCarrinho.addEventListener('click', voltarParaInicial);
-    
-    // Event Listeners - Botão Único (Modo Acessível)
-    elements.btnBotaoUnico.addEventListener('mousedown', iniciarClick);
-    elements.btnBotaoUnico.addEventListener('mouseup', finalizarClick);
-    elements.btnBotaoUnico.addEventListener('mouseleave', finalizarClick);
-    
-    // Touch Events para mobile
-    elements.btnBotaoUnico.addEventListener('touchstart', iniciarClick);
-    elements.btnBotaoUnico.addEventListener('touchend', finalizarClick);
-    
-    // Reproduzir som de boas-vindas
-    setTimeout(() => {
-        falar('Bem-vindo ao totem de autoatendimento');
-    }, 500);
+function iniciarPedido() {
+  renderizarCategorias();
+  mostrarTela('categorias');
 }
 
-// ===== MODO NORMAL =====
-function iniciarModoNormal() {
-    state.modoAcessivel = false;
-    state.telaAtual = 'categorias';
-    state.carrinho = [];
-    state.categoriaAtual = 0;
-    state.produtoAtual = 0;
-    state.posicaoNavegacao = 0;
-    
-    document.body.classList.remove('modo-acessivel');
-    
-    mostrarTelaNavegacao();
-    ocultarMenus();
-    elements.menuCategorias.classList.remove('hidden');
-    elements.carrinhoFlutante.classList.add('hidden');
-    elements.botaoModoAcessivel.classList.add('hidden');
-    
-    mostrarMenuCategorias();
-    atualizarCarrinho();
-    
-    falar('Iniciando modo normal. Selecione uma categoria');
-}
-
-function mostrarMenuCategorias() {
-    elements.listaCategorias.innerHTML = '';
-    const categorias = state.dados.categorias;
-    
-    categorias.forEach((categoria, index) => {
-        const col = document.createElement('div');
-        col.className = 'col-lg-3 col-md-4 col-sm-6';
-        
-        const card = document.createElement('div');
-        card.className = 'card card-categoria h-100';
-        card.innerHTML = `
-            <div class="card-body">
-                <div class="card-categoria-icone">${categoria.icone}</div>
-                <div class="card-categoria-nome">${categoria.nome}</div>
-                <div class="card-categoria-info">${categoria.itens.length} itens</div>
-            </div>
-        `;
-        
-        card.addEventListener('click', () => selecionarCategoria(index));
-        col.appendChild(card);
-        elements.listaCategorias.appendChild(col);
-    });
-}
-
-function selecionarCategoria(index) {
-    state.categoriaAtual = index;
-    state.produtoAtual = 0;
-    state.telaAtual = 'produtos';
-    
-    ocultarMenus();
-    elements.menuProdutos.classList.remove('hidden');
-    mostrarMenuProdutos();
-    
-    const categoria = state.dados.categorias[index];
-    falar(`Categoria ${categoria.nome} selecionada. Escolha um produto`);
-}
-
-function mostrarMenuProdutos() {
-    const categoria = state.dados.categorias[state.categoriaAtual];
-    elements.listaProdutos.innerHTML = '';
-    elements.tituloCategoriaAtual.textContent = categoria.nome;
-    
-    categoria.itens.forEach((produto, index) => {
-        const col = document.createElement('div');
-        col.className = 'col-lg-3 col-md-4 col-sm-6';
-        
-        const card = document.createElement('div');
-        card.className = 'card card-produto h-100';
-        card.innerHTML = `
-            <div class="card-body">
-                <div class="card-produto-nome">${produto.nome}</div>
-                <div class="card-produto-descricao">${produto.descricao}</div>
-                <div class="card-produto-preco">R$ ${produto.preco.toFixed(2)}</div>
-                <button class="btn btn-success w-100 mt-3 btn-add-carrinho">
-                    <i class="bi bi-plus-lg"></i> Adicionar
-                </button>
-            </div>
-        `;
-        
-        const btn = card.querySelector('.btn-add-carrinho');
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            adicionarAoCarrinho(index);
-        });
-        
-        col.appendChild(card);
-        elements.listaProdutos.appendChild(col);
-    });
-}
-
-function adicionarAoCarrinho(indexProduto) {
-    const categoria = state.dados.categorias[state.categoriaAtual];
-    const produto = categoria.itens[indexProduto];
-    
-    const itemExistente = state.carrinho.find(item => 
-        item.nome === produto.nome && item.categoria === state.categoriaAtual
-    );
-    
-    if (itemExistente) {
-        itemExistente.quantidade++;
-    } else {
-        state.carrinho.push({
-            nome: produto.nome,
-            preco: produto.preco,
-            quantidade: 1,
-            categoria: state.categoriaAtual
-        });
-    }
-    
-    atualizarCarrinho();
-    falar(`${produto.nome} adicionado ao carrinho`);
-}
-
-function atualizarCarrinho() {
-    const quantidade = state.carrinho.reduce((acc, item) => acc + item.quantidade, 0);
-    elements.contadorCarrinho.textContent = quantidade;
-    
-    if (quantidade > 0) {
-        elements.carrinhoFlutante.classList.remove('hidden');
-    } else {
-        elements.carrinhoFlutante.classList.add('hidden');
-    }
+function irParaCategorias() {
+  renderizarCategorias();
+  mostrarTela('categorias');
 }
 
 function irParaCarrinho() {
-    state.telaAtual = 'carrinho';
-    ocultarMenus();
-    elements.menuCarrinho.classList.remove('hidden');
-    mostrarMenuCarrinho();
-    falar('Abrindo carrinho de compras');
+  renderizarCarrinho();
+  mostrarTela('carrinho');
 }
 
-function mostrarMenuCarrinho() {
-    elements.listaCarrinho.innerHTML = '';
-    
-    if (state.carrinho.length === 0) {
-        elements.listaCarrinho.innerHTML = '<div class="col-12"><p class="text-muted text-center fs-5">Carrinho vazio</p></div>';
-        elements.btnFinalizarCarrinho.disabled = true;
-        return;
+function irParaConfirmacao() {
+  if (carrinho.length === 0) {
+    mostrarToast('⚠ Adicione itens ao carrinho primeiro');
+    return;
+  }
+  renderizarConfirmacao();
+  mostrarTela('confirmacao');
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDERIZAÇÃO — CATEGORIAS
+════════════════════════════════════════════════════════ */
+function renderizarCategorias() {
+  const grid = document.getElementById('categorias-grid');
+  grid.innerHTML = '';
+  cardapio.categorias.forEach((cat, i) => {
+    const card = document.createElement('div');
+    card.className = 'categoria-card';
+    card.innerHTML = `
+      <div class="categoria-emoji">${cat.emoji}</div>
+      <div class="categoria-nome">${cat.nome}</div>
+      <div class="categoria-qtd">${cat.itens.length} itens</div>
+    `;
+    card.addEventListener('click', () => selecionarCategoria(i));
+    grid.appendChild(card);
+  });
+}
+
+function selecionarCategoria(idx) {
+  AC.categoriaAtual = cardapio.categorias[idx];
+  AC.catIdx = idx;
+  document.getElementById('titulo-categoria').textContent =
+    `${AC.categoriaAtual.emoji} ${AC.categoriaAtual.nome}`;
+  renderizarProdutos(AC.categoriaAtual);
+  mostrarTela('produtos');
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDERIZAÇÃO — PRODUTOS
+════════════════════════════════════════════════════════ */
+function renderizarProdutos(cat) {
+  const grid = document.getElementById('produtos-grid');
+  grid.innerHTML = '';
+  cat.itens.forEach((item, i) => {
+    const qtdCarrinho = qtdNoCarrinho(item.nome);
+    const card = document.createElement('div');
+    card.className = 'produto-card';
+    card.id = `prod-card-${i}`;
+    card.innerHTML = `
+      <div class="produto-nome">${item.nome}</div>
+      <div class="produto-descricao">${item.descricao}</div>
+      <div class="produto-preco">${formatarPreco(item.preco)}</div>
+      <div class="produto-acoes">
+        <button class="btn-menos" onclick="alterarQtdProd('${item.nome}', ${item.preco}, -1, ${i})">−</button>
+        <span class="produto-qtd-label" id="qtd-prod-${i}">${qtdCarrinho}</span>
+        <button class="btn-mais" onclick="alterarQtdProd('${item.nome}', ${item.preco}, +1, ${i})">+</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function alterarQtdProd(nome, preco, delta, idx) {
+  alterarCarrinho(nome, preco, delta);
+  const labelEl = document.getElementById(`qtd-prod-${idx}`);
+  if (labelEl) labelEl.textContent = qtdNoCarrinho(nome);
+  atualizarContadores();
+}
+
+/* ════════════════════════════════════════════════════════
+   CARRINHO — LÓGICA
+════════════════════════════════════════════════════════ */
+function alterarCarrinho(nome, preco, delta) {
+  const idx = carrinho.findIndex(i => i.nome === nome);
+  if (idx === -1) {
+    if (delta > 0) {
+      carrinho.push({ nome, preco, qtd: 1 });
+      mostrarToast(`✔ ${nome} adicionado`);
     }
-    
-    elements.btnFinalizarCarrinho.disabled = false;
-    
-    state.carrinho.forEach((item, index) => {
-        const col = document.createElement('div');
-        col.className = 'col-lg-6 col-md-8';
-        
-        const total = (item.preco * item.quantidade).toFixed(2);
-        const card = document.createElement('div');
-        card.className = 'item-carrinho-card';
-        card.innerHTML = `
-            <div class="item-carrinho-nome">${item.nome}</div>
-            <div class="item-carrinho-info">
-                <span class="item-carrinho-quantidade">Quantidade: ${item.quantidade}</span>
-                <span class="item-carrinho-valor">R$ ${total}</span>
-            </div>
-            <div class="item-carrinho-acoes d-flex gap-2 justify-content-end">
-                <button class="btn btn-sm btn-outline-secondary btn-qtd-menos" data-index="${index}">−</button>
-                <button class="btn btn-sm btn-outline-secondary btn-qtd-mais" data-index="${index}">+</button>
-                <button class="btn btn-sm btn-danger btn-remover" data-index="${index}">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-        `;
-        
-        card.querySelector('.btn-remover').addEventListener('click', () => removerDoCarrinho(index));
-        card.querySelector('.btn-qtd-menos').addEventListener('click', () => alterarQuantidade(index, -1));
-        card.querySelector('.btn-qtd-mais').addEventListener('click', () => alterarQuantidade(index, 1));
-        
-        col.appendChild(card);
-        elements.listaCarrinho.appendChild(col);
-    });
-    
-    atualizarTotalCarrinho();
-}
-
-function alterarQuantidade(index, delta) {
-    const item = state.carrinho[index];
-    item.quantidade += delta;
-    
-    if (item.quantidade <= 0) {
-        removerDoCarrinho(index);
-    } else {
-        atualizarCarrinho();
-        mostrarMenuCarrinho();
+  } else {
+    carrinho[idx].qtd += delta;
+    if (carrinho[idx].qtd <= 0) {
+      carrinho.splice(idx, 1);
+      mostrarToast(`✕ ${nome} removido`);
+    } else if (delta > 0) {
+      mostrarToast(`✔ ${nome} adicionado`);
     }
+  }
+  atualizarContadores();
 }
 
-function removerDoCarrinho(index) {
-    const item = state.carrinho[index];
-    falar(`${item.nome} removido do carrinho`);
-    state.carrinho.splice(index, 1);
-    atualizarCarrinho();
-    mostrarMenuCarrinho();
+function qtdNoCarrinho(nome) {
+  const it = carrinho.find(i => i.nome === nome);
+  return it ? it.qtd : 0;
 }
 
-function atualizarTotalCarrinho() {
-    const total = state.carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
-    document.getElementById('totalCarrinho').textContent = total.toFixed(2);
+function totalCarrinho() {
+  return carrinho.reduce((acc, i) => acc + i.preco * i.qtd, 0);
 }
 
-function voltarTelaAnterior() {
-    if (state.telaAtual === 'categorias') {
-        voltarParaInicial();
-    } else if (state.telaAtual === 'produtos') {
-        state.telaAtual = 'categorias';
-        ocultarMenus();
-        elements.menuCategorias.classList.remove('hidden');
-        mostrarMenuCategorias();
-        falar('Voltando para categorias');
-    } else if (state.telaAtual === 'carrinho') {
-        state.telaAtual = 'produtos';
-        ocultarMenus();
-        elements.menuProdutos.classList.remove('hidden');
-        mostrarMenuProdutos();
-        falar('Voltando para produtos');
-    } else if (state.telaAtual === 'revisao') {
-        state.telaAtual = 'carrinho';
-        ocultarMenus();
-        elements.menuCarrinho.classList.remove('hidden');
-        mostrarMenuCarrinho();
-        falar('Voltando para carrinho');
-    }
+function totalItens() {
+  return carrinho.reduce((acc, i) => acc + i.qtd, 0);
 }
 
-function irParaRevisao() {
-    state.telaAtual = 'revisao';
-    ocultarMenus();
-    elements.menuRevisao.classList.remove('hidden');
-    mostrarMenuRevisao();
-    falar('Revisando seu pedido');
+function atualizarContadores() {
+  const n = totalItens();
+  ['contador-carrinho', 'contador-carrinho-2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = n;
+  });
 }
 
-function mostrarMenuRevisao() {
-    elements.listaRevisao.innerHTML = '';
-    
-    state.carrinho.forEach((item) => {
-        const col = document.createElement('div');
-        col.className = 'col-lg-6 col-md-8';
-        
-        const total = (item.preco * item.quantidade).toFixed(2);
-        const card = document.createElement('div');
-        card.className = 'item-carrinho-card';
-        card.innerHTML = `
-            <div class="item-carrinho-nome">${item.nome}</div>
-            <div class="item-carrinho-info">
-                <span class="item-carrinho-quantidade">Quantidade: ${item.quantidade}</span>
-                <span class="item-carrinho-valor">R$ ${total}</span>
-            </div>
-        `;
-        
-        col.appendChild(card);
-        elements.listaRevisao.appendChild(col);
-    });
-    
-    const total = state.carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
-    document.getElementById('totalRevisao').textContent = total.toFixed(2);
+/* ════════════════════════════════════════════════════════
+   RENDERIZAÇÃO — CARRINHO
+════════════════════════════════════════════════════════ */
+function renderizarCarrinho() {
+  const lista = document.getElementById('carrinho-lista');
+  lista.innerHTML = '';
+
+  if (carrinho.length === 0) {
+    lista.innerHTML = `
+      <div class="carrinho-vazio">
+        <div class="carrinho-vazio-icon">🛒</div>
+        <p>Seu carrinho está vazio.</p>
+        <button class="btn-primary" onclick="irParaCategorias()">Ver Cardápio</button>
+      </div>`;
+    document.getElementById('resumo-subtotal').textContent = 'R$ 0,00';
+    document.getElementById('resumo-total').textContent = 'R$ 0,00';
+    return;
+  }
+
+  carrinho.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'item-carrinho';
+    div.innerHTML = `
+      <div class="item-info">
+        <div class="item-nome">${item.nome}</div>
+        <div class="item-unit">${formatarPreco(item.preco)} / unidade</div>
+      </div>
+      <div class="item-controles">
+        <button class="btn-menos" onclick="alterarItemCarrinho(${idx},-1)">−</button>
+        <span class="produto-qtd-label">${item.qtd}</span>
+        <button class="btn-mais" onclick="alterarItemCarrinho(${idx},+1)">+</button>
+      </div>
+      <div class="item-subtotal">${formatarPreco(item.preco * item.qtd)}</div>
+    `;
+    lista.appendChild(div);
+  });
+
+  const total = totalCarrinho();
+  document.getElementById('resumo-subtotal').textContent = formatarPreco(total);
+  document.getElementById('resumo-total').textContent = formatarPreco(total);
 }
 
+function alterarItemCarrinho(idx, delta) {
+  const item = carrinho[idx];
+  if (!item) return;
+  alterarCarrinho(item.nome, item.preco, delta);
+  renderizarCarrinho();
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDERIZAÇÃO — CONFIRMAÇÃO
+════════════════════════════════════════════════════════ */
+function renderizarConfirmacao() {
+  const lista = document.getElementById('confirmacao-lista');
+  lista.innerHTML = '';
+  carrinho.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'confirmacao-item';
+    div.innerHTML = `
+      <span>${item.qtd}× ${item.nome}</span>
+      <span>${formatarPreco(item.preco * item.qtd)}</span>
+    `;
+    lista.appendChild(div);
+  });
+  document.getElementById('confirmacao-total-val').textContent = formatarPreco(totalCarrinho());
+}
+
+/* ════════════════════════════════════════════════════════
+   FINALIZAR PEDIDO
+════════════════════════════════════════════════════════ */
 function finalizarPedido() {
-    const numeroPedido = Math.floor(Math.random() * 10000);
-    state.pedidoFinal = {
-        numero: numeroPedido,
-        carrinho: [...state.carrinho],
-        total: state.carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0)
-    };
-    
-    elements.numeroPedido.textContent = `Pedido #${String(numeroPedido).padStart(4, '0')}`;
-    
-    state.telaAtual = 'finalizado';
-    ocultarMenus();
-    elements.menuFinalizado.classList.remove('hidden');
-    
-    const total = state.pedidoFinal.total.toFixed(2);
-    falar(`Pedido número ${numeroPedido} finalizado com sucesso. Total: R$ ${total}. Obrigado por sua compra!`);
+  const num = String(Math.floor(Math.random() * 900) + 100);
+  document.getElementById('numero-pedido').textContent = `#${num}`;
+  carrinho = [];
+  atualizarContadores();
+  mostrarTela('sucesso');
+  falar(`Pedido número ${num} realizado com sucesso! Aguarde ser chamado no balcão.`);
 }
 
-function voltarParaInicial() {
-    state.telaAtual = 'inicial';
-    state.carrinho = [];
-    pararAudio();
-    
-    document.body.classList.remove('modo-acessivel');
-    mostrarTelaInicial();
-    
+function novoAtendimento() {
+  carrinho = [];
+  atualizarContadores();
+  AC.fase = 'categorias';
+  AC.catIdx = 0; AC.prodIdx = 0; AC.itemIdx = 0;
+  mostrarTela('welcome');
+}
+
+/* ════════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════════ */
+let toastTimer = null;
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.classList.add('hidden'), 350);
+  }, 2000);
+}
+
+/* ════════════════════════════════════════════════════════
+   WEB SPEECH API — TEXT-TO-SPEECH
+════════════════════════════════════════════════════════ */
+function falar(texto, urgente = false) {
+  if (!window.speechSynthesis) return;
+  if (urgente) window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(texto);
+  utter.lang = 'pt-BR';
+  utter.rate = 0.95;
+  utter.pitch = 1.0;
+  utter.volume = 1.0;
+
+  // Tenta selecionar voz pt-BR
+  const vozes = speechSynthesis.getVoices();
+  const voz = vozes.find(v => v.lang.startsWith('pt')) || null;
+  if (voz) utter.voice = voz;
+
+  window.speechSynthesis.speak(utter);
+}
+
+// Vozes podem carregar assíncronamente
+speechSynthesis.onvoiceschanged = () => { /* pronto */ };
+
+/* ════════════════════════════════════════════════════════
+   MODO ACESSÍVEL — ATIVAÇÃO / DESATIVAÇÃO
+════════════════════════════════════════════════════════ */
+function ativarModoAcessivel() {
+  modoAcessivel = true;
+  AC.fase = 'categorias';
+  AC.catIdx = 0; AC.prodIdx = 0; AC.itemIdx = 0;
+
+  document.getElementById('overlay-acessivel').classList.remove('hidden');
+  atualizarInfoAcessivel();
+  falar('Bem-vindo ao modo acessível. Utilize o botão de navegação para percorrer as opções. Clique curto para avançar. Clique longo para selecionar. Duplo clique para voltar.', true);
+}
+
+function sairModoAcessivel() {
+  modoAcessivel = false;
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  document.getElementById('overlay-acessivel').classList.add('hidden');
+}
+
+/* ════════════════════════════════════════════════════════
+   MODO ACESSÍVEL — ESTADO & RENDERIZAÇÃO
+════════════════════════════════════════════════════════ */
+function atualizarInfoAcessivel() {
+  const statusEl = document.getElementById('acessivel-status');
+  const itemEl   = document.getElementById('acessivel-item-atual');
+  const descEl   = document.getElementById('acessivel-descricao');
+
+  const qtdEl    = document.getElementById('acessivel-qtd');
+  const totalEl  = document.getElementById('acessivel-total');
+  qtdEl.textContent  = totalItens();
+  totalEl.textContent = formatarPreco(totalCarrinho());
+
+  if (AC.fase === 'categorias') {
+    const cat = cardapio.categorias[AC.catIdx];
+    statusEl.textContent = 'Escolha a categoria';
+    itemEl.textContent   = `${cat.emoji}  ${cat.nome}`;
+    descEl.textContent   = `${cat.itens.length} itens disponíveis`;
+    return;
+  }
+
+  if (AC.fase === 'produtos') {
+    const cat  = cardapio.categorias[AC.catIdx];
+    const prod = cat.itens[AC.prodIdx];
+    statusEl.textContent = `Categoria: ${cat.nome}`;
+    itemEl.textContent   = prod.nome;
+    descEl.textContent   = `${prod.descricao} — ${formatarPreco(prod.preco)}`;
+    return;
+  }
+
+  if (AC.fase === 'carrinho') {
+    if (carrinho.length === 0) {
+      statusEl.textContent = 'Carrinho';
+      itemEl.textContent   = 'Carrinho vazio';
+      descEl.textContent   = 'Duplo clique para voltar ao cardápio';
+      return;
+    }
+    const op = carrinhoOpcoes();
+    const cur = op[AC.itemIdx];
+    statusEl.textContent = `Carrinho — ${totalItens()} itens`;
+    itemEl.textContent   = cur.label;
+    descEl.textContent   = cur.desc;
+    return;
+  }
+
+  if (AC.fase === 'confirmar') {
+    statusEl.textContent = 'Confirmação';
+    itemEl.textContent   = 'Confirmar pedido?';
+    descEl.textContent   = `Total: ${formatarPreco(totalCarrinho())}`;
+  }
+}
+
+function carrinhoOpcoes() {
+  const ops = carrinho.map(it => ({
+    label: `${it.qtd}× ${it.nome}`,
+    desc:  `${formatarPreco(it.preco * it.qtd)}`,
+    tipo:  'item',
+    ref:   it,
+  }));
+  ops.push({ label: 'Finalizar Pedido', desc: `Total: ${formatarPreco(totalCarrinho())}`, tipo: 'finalizar' });
+  ops.push({ label: 'Continuar Comprando', desc: 'Voltar ao cardápio', tipo: 'continuar' });
+  return ops;
+}
+
+/* ════════════════════════════════════════════════════════
+   MODO ACESSÍVEL — AÇÕES
+════════════════════════════════════════════════════════ */
+function acessivelAvancar() {
+  if (AC.fase === 'categorias') {
+    AC.catIdx = (AC.catIdx + 1) % cardapio.categorias.length;
+    atualizarInfoAcessivel();
+    const cat = cardapio.categorias[AC.catIdx];
+    falar(`Categoria: ${cat.nome}. ${cat.itens.length} itens.`, true);
+    return;
+  }
+
+  if (AC.fase === 'produtos') {
+    const cat = cardapio.categorias[AC.catIdx];
+    AC.prodIdx = (AC.prodIdx + 1) % cat.itens.length;
+    atualizarInfoAcessivel();
+    const prod = cat.itens[AC.prodIdx];
+    falar(`${prod.nome}. ${prod.descricao}. Valor ${falarPreco(prod.preco)}.`, true);
+    return;
+  }
+
+  if (AC.fase === 'carrinho') {
+    const ops = carrinhoOpcoes();
+    AC.itemIdx = (AC.itemIdx + 1) % ops.length;
+    atualizarInfoAcessivel();
+    const cur = ops[AC.itemIdx];
+    falar(`${cur.label}. ${cur.desc}`, true);
+    return;
+  }
+}
+
+function acessivelSelecionar() {
+  if (AC.fase === 'categorias') {
+    const cat = cardapio.categorias[AC.catIdx];
+    AC.fase = 'produtos';
+    AC.prodIdx = 0;
+    atualizarInfoAcessivel();
+    const prod = cat.itens[0];
+    falar(`Categoria ${cat.nome} selecionada. Primeiro item: ${prod.nome}. ${falarPreco(prod.preco)}.`, true);
+    return;
+  }
+
+  if (AC.fase === 'produtos') {
+    const cat  = cardapio.categorias[AC.catIdx];
+    const prod = cat.itens[AC.prodIdx];
+    alterarCarrinho(prod.nome, prod.preco, +1);
+    atualizarInfoAcessivel();
+    falar(`${prod.nome} adicionado ao carrinho. Carrinho possui ${totalItens()} itens. Valor total ${falarPreco(totalCarrinho())}.`, true);
+    // Oferece ir para carrinho
     setTimeout(() => {
-        falar('Bem-vindo ao totem de autoatendimento');
-    }, 500);
-}
+      AC.fase = 'carrinho';
+      AC.itemIdx = 0;
+      atualizarInfoAcessivel();
+      falar('Navegando para o carrinho. Clique longo para selecionar uma opção.', false);
+    }, 3000);
+    return;
+  }
 
-// ===== NAVEGAÇÃO DE TELAS =====
-function mostrarTelaInicial() {
-    elements.telaInicial.classList.remove('hidden');
-    elements.telaNavegacao.classList.add('hidden');
-}
-
-function mostrarTelaNavegacao() {
-    elements.telaInicial.classList.add('hidden');
-    elements.telaNavegacao.classList.remove('hidden');
-}
-
-function ocultarMenus() {
-    elements.menuCategorias.classList.add('hidden');
-    elements.menuProdutos.classList.add('hidden');
-    elements.menuCarrinho.classList.add('hidden');
-    elements.menuRevisao.classList.add('hidden');
-    elements.menuFinalizado.classList.add('hidden');
-}
-
-// ===== MODO ACESSÍVEL =====
-function iniciarModoAcessivel() {
-    state.modoAcessivel = true;
-    state.telaAtual = 'categorias';
-    state.carrinho = [];
-    state.categoriaAtual = 0;
-    state.produtoAtual = 0;
-    state.posicaoNavegacao = 0;
-    
-    document.body.classList.add('modo-acessivel');
-    
-    elements.carrinhoFlutante.classList.add('hidden');
-    elements.botaoModoAcessivel.classList.remove('hidden');
-    
-    mostrarTelaNavegacao();
-    ocultarMenus();
-    elements.menuCategorias.classList.remove('hidden');
-    
-    // Esconder navbar
-    document.querySelector('.navbar').style.display = 'none';
-    document.querySelector('.flex-grow-1').classList.add('d-flex', 'flex-column');
-    
-    falar('Bem-vindo ao modo acessível. Utilize o botão de navegação para percorrer as opções.');
-    atualizarIndicadorModoAcessivel();
-}
-
-function atualizarIndicadorModoAcessivel() {
-    if (state.telaAtual === 'categorias') {
-        const categorias = state.dados.categorias;
-        const categoria = categorias[state.categoriaAtual];
-        
-        let texto = `Categoria: ${categoria.nome}. ${categoria.itens.length} itens disponíveis.`;
-        atualizarIndicadorVisual(texto);
-        
-        // Atualizar seleção visual
-        const cards = document.querySelectorAll('#listaCategorias .card-categoria');
-        cards.forEach((card, index) => {
-            if (index === state.categoriaAtual) {
-                card.classList.add('selecionada');
-            } else {
-                card.classList.remove('selecionada');
-            }
-        });
-    }
-    else if (state.telaAtual === 'produtos') {
-        const categoria = state.dados.categorias[state.categoriaAtual];
-        const produto = categoria.itens[state.produtoAtual];
-        
-        let texto = `Produto: ${produto.nome}. Preço: R$ ${produto.preco.toFixed(2)}. ${produto.descricao}`;
-        atualizarIndicadorVisual(texto);
-        
-        const cards = document.querySelectorAll('#listaProdutos .card-produto');
-        cards.forEach((card, index) => {
-            if (index === state.produtoAtual) {
-                card.classList.add('selecionada');
-            } else {
-                card.classList.remove('selecionada');
-            }
-        });
-    }
-    else if (state.telaAtual === 'carrinho') {
-        if (state.carrinho.length === 0) {
-            atualizarIndicadorVisual('Carrinho vazio');
-        } else {
-            const item = state.carrinho[state.posicaoNavegacao];
-            const total = (item.preco * item.quantidade).toFixed(2);
-            const texto = `Item ${state.posicaoNavegacao + 1} de ${state.carrinho.length}. ${item.nome}. Quantidade: ${item.quantidade}. R$ ${total}`;
-            atualizarIndicadorVisual(texto);
-        }
-    }
-    else if (state.telaAtual === 'revisao') {
-        const total = state.carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
-        atualizarIndicadorVisual(`Resumo do pedido. ${state.carrinho.length} itens. Total: R$ ${total.toFixed(2)}`);
-    }
-    else if (state.telaAtual === 'finalizado') {
-        atualizarIndicadorVisual(`Pedido finalizado. Número: ${state.pedidoFinal.numero}`);
-    }
-}
-
-function atualizarIndicadorVisual(texto) {
-    const conteudo = document.getElementById('conteudoIndicador');
-    conteudo.innerHTML = `<span>${texto}</span>`;
-}
-
-// ===== AÇÕES DO BOTÃO ÚNICO =====
-let timeoutLongo = null;
-const TEMPO_CLICK_LONGO = 800; // ms
-
-function iniciarClick() {
-    state.clickAtivo = true;
-    state.tempoClick = Date.now();
-    
-    timeoutLongo = setTimeout(() => {
-        if (state.clickAtivo) {
-            executarClickLongo();
-        }
-    }, TEMPO_CLICK_LONGO);
-}
-
-function finalizarClick() {
-    state.clickAtivo = false;
-    clearTimeout(timeoutLongo);
-    
-    const duracao = Date.now() - state.tempoClick;
-    
-    if (duracao < TEMPO_CLICK_LONGO) {
-        // Click curto
-        executarClickCurto();
-        animarIndicador('click-curto');
-    }
-}
-
-function executarClickCurto() {
-    if (state.telaAtual === 'categorias') {
-        const categorias = state.dados.categorias;
-        state.categoriaAtual = (state.categoriaAtual + 1) % categorias.length;
-    }
-    else if (state.telaAtual === 'produtos') {
-        const categoria = state.dados.categorias[state.categoriaAtual];
-        state.produtoAtual = (state.produtoAtual + 1) % categoria.itens.length;
-    }
-    else if (state.telaAtual === 'carrinho') {
-        if (state.carrinho.length > 0) {
-            state.posicaoNavegacao = (state.posicaoNavegacao + 1) % state.carrinho.length;
-        }
-    }
-    
-    atualizarIndicadorModoAcessivel();
-}
-
-function executarClickLongo() {
-    animarIndicador('click-longo');
-    
-    if (state.telaAtual === 'categorias') {
-        const categoria = state.dados.categorias[state.categoriaAtual];
-        falar(`Categoria ${categoria.nome} selecionada.`);
-        
-        state.telaAtual = 'produtos';
-        state.produtoAtual = 0;
-        state.posicaoNavegacao = 0;
-        
-        ocultarMenus();
-        elements.menuProdutos.classList.remove('hidden');
-        mostrarMenuProdutosModoAcessivel();
-        atualizarIndicadorModoAcessivel();
-        
-        falar(`Navegando pelos produtos da categoria ${categoria.nome}`);
-    }
-    else if (state.telaAtual === 'produtos') {
-        const categoria = state.dados.categorias[state.categoriaAtual];
-        const produto = categoria.itens[state.produtoAtual];
-        
-        falar(`${produto.nome} adicionado ao carrinho.`);
-        adicionarAoCarrinho(state.produtoAtual);
-    }
-    else if (state.telaAtual === 'carrinho') {
-        if (state.carrinho.length > 0) {
-            const item = state.carrinho[state.posicaoNavegacao];
-            falar(`${item.nome} removido do carrinho.`);
-            state.carrinho.splice(state.posicaoNavegacao, 1);
-            
-            if (state.carrinho.length > 0) {
-                state.posicaoNavegacao = state.posicaoNavegacao % state.carrinho.length;
-            }
-            atualizarCarrinho();
-            atualizarIndicadorModoAcessivel();
-        }
-    }
-    else if (state.telaAtual === 'revisao') {
-        finalizarPedido();
-    }
-}
-
-function executarDuploClique() {
-    animarIndicador('duplo-clique');
-    
-    if (state.telaAtual === 'produtos') {
-        state.telaAtual = 'categorias';
-        state.categoriaAtual = 0;
-        state.produtoAtual = 0;
-        ocultarMenus();
-        elements.menuCategorias.classList.remove('hidden');
-        mostrarMenuCategorias();
-        falar('Voltando para categorias');
-    }
-    else if (state.telaAtual === 'carrinho') {
-        state.telaAtual = 'produtos';
-        state.produtoAtual = 0;
-        ocultarMenus();
-        elements.menuProdutos.classList.remove('hidden');
-        mostrarMenuProdutosModoAcessivel();
-        falar('Voltando para produtos');
-    }
-    else if (state.telaAtual === 'revisao') {
-        state.telaAtual = 'carrinho';
-        state.posicaoNavegacao = 0;
-        ocultarMenus();
-        elements.menuCarrinho.classList.remove('hidden');
-        mostrarMenuCarrinhoModoAcessivel();
-        falar('Voltando para carrinho');
-    }
-    
-    atualizarIndicadorModoAcessivel();
-}
-
-// Detectar duplo clique
-let ultimoClick = 0;
-let nCliques = 0;
-
-elements.btnBotaoUnico.addEventListener('click', () => {
-    const agora = Date.now();
-    if (agora - ultimoClick < 300) {
-        nCliques++;
-        if (nCliques === 2) {
-            executarDuploClique();
-            nCliques = 0;
-        }
+  if (AC.fase === 'carrinho') {
+    const ops = carrinhoOpcoes();
+    const cur = ops[AC.itemIdx];
+    if (cur.tipo === 'finalizar') {
+      if (carrinho.length === 0) {
+        falar('Seu carrinho está vazio. Adicione itens antes de finalizar.', true);
+        return;
+      }
+      AC.fase = 'confirmar';
+      atualizarInfoAcessivel();
+      falar(`Confirmar pedido? Total: ${falarPreco(totalCarrinho())}. Clique longo para confirmar. Duplo clique para voltar.`, true);
+    } else if (cur.tipo === 'continuar') {
+      AC.fase = 'categorias';
+      AC.catIdx = 0;
+      atualizarInfoAcessivel();
+      falar('Voltando ao cardápio. Navegue pelas categorias.', true);
     } else {
-        nCliques = 1;
+      // Remove uma unidade do item
+      const it = cur.ref;
+      alterarCarrinho(it.nome, it.preco, -1);
+      AC.itemIdx = Math.min(AC.itemIdx, carrinhoOpcoes().length - 1);
+      atualizarInfoAcessivel();
+      falar(`${it.nome} removido. Carrinho: ${totalItens()} itens.`, true);
     }
-    ultimoClick = agora;
-});
+    return;
+  }
 
-function animarIndicador(tipo) {
-    elements.indicadorAcao.classList.remove('click-curto', 'click-longo', 'duplo-clique');
-    // Forçar reflow
-    void elements.indicadorAcao.offsetWidth;
-    elements.indicadorAcao.classList.add(tipo);
+  if (AC.fase === 'confirmar') {
+    finalizarPedidoAcessivel();
+  }
 }
 
-// ===== MODO ACESSÍVEL - MENUS CUSTOMIZADOS =====
-function mostrarMenuProdutosModoAcessivel() {
-    const categoria = state.dados.categorias[state.categoriaAtual];
-    elements.listaProdutos.innerHTML = '';
-    elements.tituloCategoriaAtual.textContent = categoria.nome;
-    
-    categoria.itens.forEach((produto, index) => {
-        const col = document.createElement('div');
-        col.className = 'col-lg-3 col-md-4 col-sm-6';
-        
-        const card = document.createElement('div');
-        card.className = 'card card-produto h-100';
-        card.innerHTML = `
-            <div class="card-body">
-                <div class="card-produto-nome">${produto.nome}</div>
-                <div class="card-produto-descricao">${produto.descricao}</div>
-                <div class="card-produto-preco">R$ ${produto.preco.toFixed(2)}</div>
-            </div>
-        `;
-        
-        col.appendChild(card);
-        elements.listaProdutos.appendChild(col);
-    });
-    
-    atualizarIndicadorModoAcessivel();
+let _ultimoVoltar = 0;
+function voltarAcessivel() {
+  // Evita duplo disparo acidental num intervalo menor que 800ms
+  if (Date.now() - _ultimoVoltar < 800) return;
+  _ultimoVoltar = Date.now();
+
+  // Garante que qualquer fala anterior seja cancelada antes de falar o destino
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+  if (AC.fase === 'produtos') {
+    const cat = cardapio.categorias[AC.catIdx];
+    AC.fase = 'categorias';
+    atualizarInfoAcessivel();
+    falar(`Voltou para o cardápio. Categoria atual: ${cat.nome}. Clique curto para mudar de categoria. Clique longo para entrar na categoria.`, true);
+    return;
+  }
+
+  if (AC.fase === 'carrinho') {
+    const cat  = cardapio.categorias[AC.catIdx];
+    const prod = cat.itens[AC.prodIdx];
+    AC.fase = 'produtos';
+    atualizarInfoAcessivel();
+    falar(`Voltou para os produtos de ${cat.nome}. Item atual: ${prod.nome}. ${falarPreco(prod.preco)}. Clique curto para navegar. Clique longo para adicionar.`, true);
+    return;
+  }
+
+  if (AC.fase === 'confirmar') {
+    AC.fase = 'carrinho';
+    AC.itemIdx = 0;
+    atualizarInfoAcessivel();
+    falar(`Voltou para o carrinho. Você tem ${totalItens()} itens. Total: ${falarPreco(totalCarrinho())}. Clique curto para navegar pelos itens.`, true);
+    return;
+  }
+
+  if (AC.fase === 'categorias') {
+    const cat = cardapio.categorias[AC.catIdx];
+    falar(`Você já está no cardápio, na categoria ${cat.nome}. Não é possível voltar mais.`, true);
+  }
 }
 
-function mostrarMenuCarrinhoModoAcessivel() {
-    ocultarMenus();
-    elements.menuCarrinho.classList.remove('hidden');
-    
-    state.telaAtual = 'carrinho';
-    state.posicaoNavegacao = 0;
-    
-    mostrarMenuCarrinho();
-    atualizarIndicadorModoAcessivel();
-    
-    if (state.carrinho.length > 0) {
-        falar('Carrinho aberto. Seus itens');
-    } else {
-        falar('Carrinho vazio');
-    }
+function finalizarPedidoAcessivel() {
+  const num = String(Math.floor(Math.random() * 900) + 100);
+  document.getElementById('numero-pedido').textContent = `#${num}`;
+  carrinho = [];
+  AC.fase = 'categorias';
+  AC.catIdx = 0;
+  atualizarInfoAcessivel();
+  falar(`Pedido número ${num} realizado com sucesso! Aguarde ser chamado no balcão. Obrigado por usar o modo acessível.`, true);
+  // Fecha overlay depois de um tempo
+  setTimeout(() => {
+    sairModoAcessivel();
+    mostrarTela('sucesso');
+  }, 5000);
 }
 
-// ===== INICIALIZAR APLICAÇÃO =====
-document.addEventListener('DOMContentLoaded', inicializar);
+/* ════════════════════════════════════════════════════════
+   BOTÃO ÚNICO — DETECÇÃO CLIQUE CURTO / LONGO / DUPLO
+   Fluxo:
+     mousedown → inicia timer de clique longo (LONGO_MS)
+     mouseup (antes do timer) → clique curto/duplo
+       - se já houve um clique curto recente (< DUPLO_MS) → DUPLO
+       - senão, agenda verificação após DUPLO_MS → CURTO
+     mouseup (depois do timer) → já foi tratado como longo, ignora
+════════════════════════════════════════════════════════ */
+const DUPLO_MS       = 350;
+let _duploTimer      = null;   // timer aguardando 2º clique
+let _aguardandoDuplo = false;  // true = 1º clique curto registrado
+
+function iniciarPressao(e) {
+  if (e) e.preventDefault();
+  pressaoInicio = Date.now();
+  document.getElementById('btn-navegacao').classList.add('pressionado');
+
+  pressaoTimer = setTimeout(() => {
+    // ── Clique LONGO ──
+    pressaoTimer  = null;
+    pressaoInicio = 0;
+    // Cancela qualquer espera de duplo clique pendente
+    if (_duploTimer) { clearTimeout(_duploTimer); _duploTimer = null; }
+    _aguardandoDuplo = false;
+    document.getElementById('btn-navegacao').classList.remove('pressionado');
+    acessivelSelecionar();
+  }, LONGO_MS);
+}
+
+function liberarPressao(e) {
+  if (e) e.preventDefault();
+  document.getElementById('btn-navegacao').classList.remove('pressionado');
+
+  // Se o timer já disparou (clique longo confirmado), não faz nada
+  if (!pressaoTimer) return;
+  clearTimeout(pressaoTimer);
+  pressaoTimer  = null;
+  pressaoInicio = 0;
+
+  // ── Clique CURTO detectado ──
+  if (_aguardandoDuplo) {
+    // Segundo clique dentro do intervalo → DUPLO CLIQUE
+    clearTimeout(_duploTimer);
+    _duploTimer      = null;
+    _aguardandoDuplo = false;
+    voltarAcessivel();
+  } else {
+    // Primeiro clique curto: aguarda possível segundo
+    _aguardandoDuplo = true;
+    _duploTimer = setTimeout(() => {
+      _duploTimer      = null;
+      _aguardandoDuplo = false;
+      acessivelAvancar(); // tempo esgotado → era clique simples
+    }, DUPLO_MS);
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   UTILITÁRIOS
+════════════════════════════════════════════════════════ */
+function formatarPreco(valor) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function falarPreco(valor) {
+  // Formata para fala natural: "15,00" → "quinze reais"
+  // Usa o locale pt-BR com palavras
+  const inteiro = Math.floor(valor);
+  const centavos = Math.round((valor - inteiro) * 100);
+  let texto = `${inteiro} reais`;
+  if (centavos > 0) texto += ` e ${centavos} centavos`;
+  return texto;
+}

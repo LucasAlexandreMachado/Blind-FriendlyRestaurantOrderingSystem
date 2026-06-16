@@ -167,7 +167,9 @@ const utteranceConfig = {
    - Bordas reforçadas
    - Fonte grande (até 56px)
 
-5. **Robustez**
+5. **Robustez e Precisão (Anti-Ghosting)**
+   - Uso de `Pointer Events` para unificar interações de mouse, toque e caneta sem duplicação.
+   - Algoritmo de *Debounce* (anti-rebote) para o botão de acessibilidade, filtrando tremores ou cliques duplos acidentais.
    - Compatível com leitores de tela
    - Sem plugins necessários
    - Funciona offline (exceto Web Speech)

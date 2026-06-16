@@ -1,0 +1,47 @@
+{
+  "restaurante": "Sabor & Arte",
+  "categorias": [
+    {
+      "nome": "Entradas",
+      "emoji": "🥗",
+      "itens": [
+        { "nome": "Batata Frita", "descricao": "Porção média crocante com sal temperado", "preco": 15.00 },
+        { "nome": "Onion Rings", "descricao": "Anéis de cebola empanados e fritos", "preco": 17.00 },
+        { "nome": "Isca de Frango", "descricao": "Tiras de frango grelhado com molho da casa", "preco": 22.00 },
+        { "nome": "Bruschetta", "descricao": "Pão italiano com tomate, manjericão e azeite", "preco": 18.00 }
+      ]
+    },
+    {
+      "nome": "Pratos Principais",
+      "emoji": "🍔",
+      "itens": [
+        { "nome": "X-Burguer Classic", "descricao": "Hambúrguer artesanal 180g com queijo, alface e tomate", "preco": 35.00 },
+        { "nome": "X-Bacon Duplo", "descricao": "Dois hambúrgueres 180g com bacon crocante e cheddar", "preco": 45.00 },
+        { "nome": "Frango Grelhado", "descricao": "Filé de frango grelhado com batatas rústicas", "preco": 38.00 },
+        { "nome": "Wrap Vegetariano", "descricao": "Tortilla com legumes salteados, guacamole e queijo", "preco": 32.00 },
+        { "nome": "Massa Carbonara", "descricao": "Penne ao molho carbonara com pancetta e parmesão", "preco": 40.00 }
+      ]
+    },
+    {
+      "nome": "Bebidas",
+      "emoji": "🥤",
+      "itens": [
+        { "nome": "Refrigerante", "descricao": "Lata 350ml - Coca-Cola, Guaraná ou Sprite", "preco": 7.00 },
+        { "nome": "Suco Natural", "descricao": "Copo 400ml - Laranja, Maracujá ou Limão", "preco": 12.00 },
+        { "nome": "Água Mineral", "descricao": "Garrafa 500ml sem ou com gás", "preco": 5.00 },
+        { "nome": "Milk-Shake", "descricao": "500ml - Chocolate, Morango ou Baunilha", "preco": 18.00 },
+        { "nome": "Chá Gelado", "descricao": "Copo 400ml - Pêssego, Limão ou Morango", "preco": 9.00 }
+      ]
+    },
+    {
+      "nome": "Sobremesas",
+      "emoji": "🍰",
+      "itens": [
+        { "nome": "Brownie com Sorvete", "descricao": "Brownie quente com sorvete de creme e calda de chocolate", "preco": 22.00 },
+        { "nome": "Pudim de Leite", "descricao": "Fatia de pudim cremoso com calda de caramelo", "preco": 14.00 },
+        { "nome": "Petit Gateau", "descricao": "Bolinho de chocolate quente com sorvete de creme", "preco": 25.00 },
+        { "nome": "Cheesecake", "descricao": "Fatia de cheesecake com calda de frutas vermelhas", "preco": 20.00 }
+      ]
+    }
+  ]
+}
