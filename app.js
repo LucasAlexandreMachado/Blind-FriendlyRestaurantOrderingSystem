@@ -14,7 +14,8 @@ let modoAcessivel  = false;
 
 /* ── Estado do modo acessível ── */
 const AC = {
-  fase: 'categorias',            // 'categorias' | 'produtos' | 'carrinho' | 'confirmar'
+  fase: 'menu_principal',        // 'menu_principal' | 'categorias' | 'produtos' | 'carrinho' | 'confirmar'
+  menuIdx:  0,
   catIdx:   0,
   prodIdx:  0,
   itemIdx:  0,
@@ -315,12 +316,13 @@ speechSynthesis.onvoiceschanged = () => { /* pronto */ };
 ════════════════════════════════════════════════════════ */
 function ativarModoAcessivel() {
   modoAcessivel = true;
-  AC.fase = 'categorias';
+  AC.fase = 'menu_principal';
+  AC.menuIdx = 0;
   AC.catIdx = 0; AC.prodIdx = 0; AC.itemIdx = 0;
 
   document.getElementById('overlay-acessivel').classList.remove('hidden');
   atualizarInfoAcessivel();
-  falar('Bem-vindo ao modo acessível. Utilize o botão de navegação para percorrer as opções. Clique curto para avançar. Clique longo para selecionar. Duplo clique para voltar.', true);
+  falar('Bem-vindo ao modo acessível. Você está no Menu Principal. Primeira opção: Ver Cardápio. Utilize clique curto para avançar. Clique longo para selecionar. Duplo clique para voltar.', true);
 }
 
 function sairModoAcessivel() {
@@ -341,6 +343,18 @@ function atualizarInfoAcessivel() {
   const totalEl  = document.getElementById('acessivel-total');
   qtdEl.textContent  = totalItens();
   totalEl.textContent = formatarPreco(totalCarrinho());
+
+  if (AC.fase === 'menu_principal') {
+    statusEl.textContent = 'Menu Principal';
+    if (AC.menuIdx === 0) {
+      itemEl.textContent = '📖 Ver Cardápio';
+      descEl.textContent = 'Navegar pelas categorias e produtos';
+    } else {
+      itemEl.textContent = `🛒 Ver Carrinho (${totalItens()} itens)`;
+      descEl.textContent = `Ir para o carrinho e finalizar. Total: ${formatarPreco(totalCarrinho())}`;
+    }
+    return;
+  }
 
   if (AC.fase === 'categorias') {
     const cat = cardapio.categorias[AC.catIdx];
@@ -370,7 +384,7 @@ function atualizarInfoAcessivel() {
     const cur = op[AC.itemIdx];
     statusEl.textContent = `Carrinho — ${totalItens()} itens`;
     itemEl.textContent   = cur.label;
-    descEl.textContent   = cur.desc;
+    descEl.textContent   = cur.descVis;
     return;
   }
 
@@ -382,14 +396,30 @@ function atualizarInfoAcessivel() {
 }
 
 function carrinhoOpcoes() {
-  const ops = carrinho.map(it => ({
-    label: `${it.qtd}× ${it.nome}`,
-    desc:  `${formatarPreco(it.preco * it.qtd)}`,
-    tipo:  'item',
-    ref:   it,
-  }));
-  ops.push({ label: 'Finalizar Pedido', desc: `Total: ${formatarPreco(totalCarrinho())}`, tipo: 'finalizar' });
-  ops.push({ label: 'Continuar Comprando', desc: 'Voltar ao cardápio', tipo: 'continuar' });
+  const ops = [];
+  ops.push({ 
+    label: 'Finalizar Pedido', 
+    descVis: `Total: ${formatarPreco(totalCarrinho())}`,
+    descFala: `Valor total do pedido: ${falarPreco(totalCarrinho())}. Clique longo para ir para a confirmação.`,
+    tipo: 'finalizar' 
+  });
+
+  carrinho.forEach(it => {
+    ops.push({
+      label: `${it.qtd}× ${it.nome}`,
+      descVis: `Subtotal: ${formatarPreco(it.preco * it.qtd)}`,
+      descFala: `Subtotal: ${falarPreco(it.preco * it.qtd)}. Clique longo para remover uma unidade deste item.`,
+      tipo:  'item',
+      ref:   it,
+    });
+  });
+
+  ops.push({ 
+    label: 'Continuar Comprando', 
+    descVis: 'Voltar ao cardápio',
+    descFala: 'Clique longo para voltar ao cardápio.',
+    tipo: 'continuar' 
+  });
   return ops;
 }
 
@@ -397,6 +427,17 @@ function carrinhoOpcoes() {
    MODO ACESSÍVEL — AÇÕES
 ════════════════════════════════════════════════════════ */
 function acessivelAvancar() {
+  if (AC.fase === 'menu_principal') {
+    AC.menuIdx = (AC.menuIdx + 1) % 2;
+    atualizarInfoAcessivel();
+    if (AC.menuIdx === 0) {
+      falar('Opção: Ver Cardápio. Clique longo para abrir as categorias.', true);
+    } else {
+      falar(`Opção: Ver Carrinho e Finalizar. Você tem ${totalItens()} itens. Total: ${falarPreco(totalCarrinho())}.`, true);
+    }
+    return;
+  }
+
   if (AC.fase === 'categorias') {
     AC.catIdx = (AC.catIdx + 1) % cardapio.categorias.length;
     atualizarInfoAcessivel();
@@ -419,12 +460,34 @@ function acessivelAvancar() {
     AC.itemIdx = (AC.itemIdx + 1) % ops.length;
     atualizarInfoAcessivel();
     const cur = ops[AC.itemIdx];
-    falar(`${cur.label}. ${cur.desc}`, true);
+    falar(`Opção: ${cur.label}. ${cur.descFala}`, true);
     return;
   }
 }
 
 function acessivelSelecionar() {
+  if (AC.fase === 'menu_principal') {
+    if (AC.menuIdx === 0) {
+      AC.fase = 'categorias';
+      AC.catIdx = 0;
+      atualizarInfoAcessivel();
+      const cat = cardapio.categorias[0];
+      falar(`Cardápio aberto. Primeira categoria: ${cat.nome}. ${cat.itens.length} itens.`, true);
+    } else {
+      AC.fase = 'carrinho';
+      AC.itemIdx = 0;
+      atualizarInfoAcessivel();
+      if (carrinho.length === 0) {
+        falar('Seu carrinho está vazio. Adicione itens antes de tentar finalizar. Duplo clique para voltar ao menu principal.', true);
+      } else {
+        const ops = carrinhoOpcoes();
+        const cur = ops[0];
+        falar(`Você entrou no carrinho com ${totalItens()} itens. Valor total: ${falarPreco(totalCarrinho())}. Dê um clique curto para navegar e remover itens. Primeira opção: ${cur.label}. ${cur.descFala}`, true);
+      }
+    }
+    return;
+  }
+
   if (AC.fase === 'categorias') {
     const cat = cardapio.categorias[AC.catIdx];
     AC.fase = 'produtos';
@@ -440,14 +503,7 @@ function acessivelSelecionar() {
     const prod = cat.itens[AC.prodIdx];
     alterarCarrinho(prod.nome, prod.preco, +1);
     atualizarInfoAcessivel();
-    falar(`${prod.nome} adicionado ao carrinho. Carrinho possui ${totalItens()} itens. Valor total ${falarPreco(totalCarrinho())}.`, true);
-    // Oferece ir para carrinho
-    setTimeout(() => {
-      AC.fase = 'carrinho';
-      AC.itemIdx = 0;
-      atualizarInfoAcessivel();
-      falar('Navegando para o carrinho. Clique longo para selecionar uma opção.', false);
-    }, 3000);
+    falar(`${prod.nome} adicionado ao carrinho. O carrinho possui ${totalItens()} itens. Total: ${falarPreco(totalCarrinho())}. Continue clicando curto para ver mais produtos, ou dê duplo clique para voltar às categorias.`, true);
     return;
   }
 
@@ -501,11 +557,10 @@ function voltarAcessivel() {
   }
 
   if (AC.fase === 'carrinho') {
-    const cat  = cardapio.categorias[AC.catIdx];
-    const prod = cat.itens[AC.prodIdx];
-    AC.fase = 'produtos';
+    AC.fase = 'menu_principal';
+    AC.menuIdx = 1;
     atualizarInfoAcessivel();
-    falar(`Voltou para os produtos de ${cat.nome}. Item atual: ${prod.nome}. ${falarPreco(prod.preco)}. Clique curto para navegar. Clique longo para adicionar.`, true);
+    falar(`Voltou para o menu principal. Opção atual: Ver Carrinho.`, true);
     return;
   }
 
@@ -518,8 +573,15 @@ function voltarAcessivel() {
   }
 
   if (AC.fase === 'categorias') {
-    const cat = cardapio.categorias[AC.catIdx];
-    falar(`Você já está no cardápio, na categoria ${cat.nome}. Não é possível voltar mais.`, true);
+    AC.fase = 'menu_principal';
+    AC.menuIdx = 0;
+    atualizarInfoAcessivel();
+    falar(`Voltou para o menu principal. Opção atual: Ver Cardápio.`, true);
+    return;
+  }
+
+  if (AC.fase === 'menu_principal') {
+    falar('Você já está no menu principal. Não é possível voltar mais.', true);
   }
 }
 
