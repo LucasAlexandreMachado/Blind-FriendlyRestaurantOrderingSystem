@@ -6,6 +6,11 @@ Protótipo web de um totem de autoatendimento para restaurantes com foco em **ac
 
 O sistema implementa conceitos de design inclusivo, navegação multimodal e usabilidade centrada no usuário.
 
+## 🌐 Demonstração Online
+
+Acesse o protótipo rodando diretamente no navegador através do GitHub Pages:
+[**Testar Totem de Autoatendimento**](https://lucasalexandremachado.github.io/Blind-FriendlyRestaurantOrderingSystem/)
+
 ## 🎯 Características Principais
 
 ### Modo Normal
