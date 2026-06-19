@@ -513,6 +513,10 @@ function acessivelAvancar() {
   }
 
   if (AC.fase === 'carrinho') {
+    if (carrinho.length === 0) {
+      falar('Seu carrinho está vazio. Duplo clique para voltar.', true);
+      return;
+    }
     const ops = carrinhoOpcoes();
     AC.itemIdx = (AC.itemIdx + 1) % ops.length;
     atualizarInfoAcessivel();
@@ -601,13 +605,13 @@ function acessivelSelecionar() {
   }
 
   if (AC.fase === 'carrinho') {
+    if (carrinho.length === 0) {
+      falar('Seu carrinho está vazio. Duplo clique para voltar.', true);
+      return;
+    }
     const ops = carrinhoOpcoes();
     const cur = ops[AC.itemIdx];
     if (cur.tipo === 'finalizar') {
-      if (carrinho.length === 0) {
-        falar('Seu carrinho está vazio. Adicione itens antes de finalizar.', true);
-        return;
-      }
       AC.fase = 'confirmar';
       atualizarInfoAcessivel();
       falar(`Confirmar pedido? Total: ${falarPreco(totalCarrinho())}. Clique longo para confirmar. Duplo clique para voltar.`, true);
