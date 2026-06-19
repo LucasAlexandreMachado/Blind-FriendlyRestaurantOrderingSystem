@@ -298,7 +298,6 @@ function finalizarPedido() {
   
   setTimeout(() => {
     mostrarTela('sucesso');
-    falar(`Pedido número ${num} realizado com sucesso! Aguarde ser chamado no balcão.`);
   }, 2000);
 }
 
