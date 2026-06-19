@@ -174,7 +174,7 @@ function alterarCarrinho(nome, preco, delta) {
   const idx = carrinho.findIndex(i => i.nome === nome);
   if (idx === -1) {
     if (delta > 0) {
-      carrinho.push({ nome, preco, qtd: 1 });
+      carrinho.push({ nome, preco, qtd: delta });
       mostrarToast(`✔ ${nome} adicionado`);
     }
   } else {
