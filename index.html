@@ -176,6 +176,29 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════
+     MODAL PRODUTO
+═══════════════════════════════════════════════ -->
+<div id="modal-produto" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button class="btn-fechar-modal" onclick="fecharModalProduto()">✕</button>
+    <h2 id="modal-produto-nome">Nome</h2>
+    <p id="modal-produto-descricao">Descrição</p>
+    <div class="modal-produto-preco" id="modal-produto-preco">R$ 0,00</div>
+    
+    <div class="modal-controles-container">
+      <span class="modal-label">Quantidade no carrinho:</span>
+      <div class="modal-controles">
+        <button class="btn-menos" onclick="alterarQtdModal(-1)">−</button>
+        <span class="produto-qtd-label" id="modal-produto-qtd">0</span>
+        <button class="btn-mais" onclick="alterarQtdModal(1)">+</button>
+      </div>
+    </div>
+    
+    <button class="btn-primary btn-modal-acao" onclick="confirmarModalProduto()">✔ Concluir</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
      TOAST FEEDBACK VISUAL
 ═══════════════════════════════════════════════ -->
 <div id="toast" class="toast hidden"></div>

@@ -117,7 +117,6 @@ function renderizarProdutos(cat) {
   const grid = document.getElementById('produtos-grid');
   grid.innerHTML = '';
   cat.itens.forEach((item, i) => {
-    const qtdCarrinho = qtdNoCarrinho(item.nome);
     const card = document.createElement('div');
     card.className = 'produto-card';
     card.id = `prod-card-${i}`;
@@ -125,21 +124,47 @@ function renderizarProdutos(cat) {
       <div class="produto-nome">${item.nome}</div>
       <div class="produto-descricao">${item.descricao}</div>
       <div class="produto-preco">${formatarPreco(item.preco)}</div>
-      <div class="produto-acoes">
-        <button class="btn-menos" onclick="alterarQtdProd('${item.nome}', ${item.preco}, -1, ${i})">−</button>
-        <span class="produto-qtd-label" id="qtd-prod-${i}">${qtdCarrinho}</span>
-        <button class="btn-mais" onclick="alterarQtdProd('${item.nome}', ${item.preco}, +1, ${i})">+</button>
-      </div>
     `;
+    card.onclick = () => abrirModalProduto(i);
     grid.appendChild(card);
   });
 }
 
-function alterarQtdProd(nome, preco, delta, idx) {
-  alterarCarrinho(nome, preco, delta);
-  const labelEl = document.getElementById(`qtd-prod-${idx}`);
-  if (labelEl) labelEl.textContent = qtdNoCarrinho(nome);
-  atualizarContadores();
+let produtoSelecionado = null;
+let qtdTemporariaModal = 0;
+
+function abrirModalProduto(idx) {
+  const cat = AC.categoriaAtual || cardapio.categorias[AC.catIdx];
+  produtoSelecionado = cat.itens[idx];
+  qtdTemporariaModal = qtdNoCarrinho(produtoSelecionado.nome);
+  
+  document.getElementById('modal-produto-nome').textContent = produtoSelecionado.nome;
+  document.getElementById('modal-produto-descricao').textContent = produtoSelecionado.descricao;
+  document.getElementById('modal-produto-preco').textContent = formatarPreco(produtoSelecionado.preco);
+  document.getElementById('modal-produto-qtd').textContent = qtdTemporariaModal;
+  
+  document.getElementById('modal-produto').classList.add('show');
+}
+
+function fecharModalProduto() {
+  document.getElementById('modal-produto').classList.remove('show');
+  produtoSelecionado = null;
+}
+
+function confirmarModalProduto() {
+  if (!produtoSelecionado) return;
+  const diferenca = qtdTemporariaModal - qtdNoCarrinho(produtoSelecionado.nome);
+  if (diferenca !== 0) {
+    alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, diferenca);
+  }
+  fecharModalProduto();
+}
+
+function alterarQtdModal(delta) {
+  if (!produtoSelecionado) return;
+  qtdTemporariaModal += delta;
+  if (qtdTemporariaModal < 0) qtdTemporariaModal = 0;
+  document.getElementById('modal-produto-qtd').textContent = qtdTemporariaModal;
 }
 
 /* ════════════════════════════════════════════════════════
@@ -373,6 +398,18 @@ function atualizarInfoAcessivel() {
     return;
   }
 
+  if (AC.fase === 'modal_produto') {
+    statusEl.textContent = `Produto: ${produtoSelecionado.nome}`;
+    const descOp = [
+      'Adicionar +1',
+      'Remover -1',
+      'Concluir (Fechar)'
+    ];
+    itemEl.textContent = descOp[AC.itemIdx];
+    descEl.textContent = `Selecionado: ${qtdTemporariaModal}`;
+    return;
+  }
+
   if (AC.fase === 'carrinho') {
     if (carrinho.length === 0) {
       statusEl.textContent = 'Carrinho';
@@ -451,7 +488,19 @@ function acessivelAvancar() {
     AC.prodIdx = (AC.prodIdx + 1) % cat.itens.length;
     atualizarInfoAcessivel();
     const prod = cat.itens[AC.prodIdx];
-    falar(`${prod.nome}. ${prod.descricao}. Valor ${falarPreco(prod.preco)}.`, true);
+    falar(`${prod.nome}. ${prod.descricao}. Valor ${falarPreco(prod.preco)}. Clique longo para ver opções.`, true);
+    return;
+  }
+
+  if (AC.fase === 'modal_produto') {
+    AC.itemIdx = (AC.itemIdx + 1) % 3;
+    const opcoes = [
+      'Adicionar uma unidade.',
+      'Remover uma unidade.',
+      'Concluir e fechar.'
+    ];
+    atualizarInfoAcessivel();
+    falar(`Opção: ${opcoes[AC.itemIdx]} Clique longo para confirmar.`, true);
     return;
   }
 
@@ -501,9 +550,38 @@ function acessivelSelecionar() {
   if (AC.fase === 'produtos') {
     const cat  = cardapio.categorias[AC.catIdx];
     const prod = cat.itens[AC.prodIdx];
-    alterarCarrinho(prod.nome, prod.preco, +1);
+    AC.fase = 'modal_produto';
+    AC.itemIdx = 0; // Adicionar por padrão
+    produtoSelecionado = prod;
+    qtdTemporariaModal = qtdNoCarrinho(prod.nome);
     atualizarInfoAcessivel();
-    falar(`${prod.nome} adicionado ao carrinho. O carrinho possui ${totalItens()} itens. Total: ${falarPreco(totalCarrinho())}. Continue clicando curto para ver mais produtos, ou dê duplo clique para voltar às categorias.`, true);
+    falar(`Produto ${prod.nome} selecionado. Valor ${falarPreco(prod.preco)}. Você tem ${qtdTemporariaModal} selecionados. Opção atual: Adicionar uma unidade. Clique curto para ver mais opções. Clique longo para selecionar. Duplo clique para cancelar.`, true);
+    return;
+  }
+
+  if (AC.fase === 'modal_produto') {
+    if (AC.itemIdx === 0) {
+      qtdTemporariaModal++;
+      atualizarInfoAcessivel();
+      falar(`Unidade adicionada. Quantidade selecionada: ${qtdTemporariaModal}.`, true);
+    } else if (AC.itemIdx === 1) {
+      if (qtdTemporariaModal > 0) {
+        qtdTemporariaModal--;
+        atualizarInfoAcessivel();
+        falar(`Unidade removida. Quantidade selecionada: ${qtdTemporariaModal}.`, true);
+      } else {
+        falar(`Quantidade já é zero.`, true);
+      }
+    } else if (AC.itemIdx === 2) {
+      const diferenca = qtdTemporariaModal - qtdNoCarrinho(produtoSelecionado.nome);
+      if (diferenca !== 0) {
+        alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, diferenca);
+      }
+      AC.fase = 'produtos';
+      produtoSelecionado = null;
+      atualizarInfoAcessivel();
+      falar(`Alterações salvas. Voltando para lista de produtos. Produto atual: ${cardapio.categorias[AC.catIdx].itens[AC.prodIdx].nome}.`, true);
+    }
     return;
   }
 
@@ -547,6 +625,14 @@ function voltarAcessivel() {
 
   // Garante que qualquer fala anterior seja cancelada antes de falar o destino
   if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+  if (AC.fase === 'modal_produto') {
+    AC.fase = 'produtos';
+    produtoSelecionado = null;
+    atualizarInfoAcessivel();
+    falar(`Cancelado. Nenhuma alteração foi feita. Você voltou para a lista de produtos. Produto atual: ${cardapio.categorias[AC.catIdx].itens[AC.prodIdx].nome}.`, true);
+    return;
+  }
 
   if (AC.fase === 'produtos') {
     const cat = cardapio.categorias[AC.catIdx];
