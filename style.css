@@ -517,8 +517,8 @@ kbd {
    TOAST
 ═══════════════════════════════════════════════ */
 .toast {
-  position: fixed; bottom: 60px; left: 50%;
-  transform: translateX(-50%) translateY(20px);
+  position: fixed; bottom: 60px; right: 40px;
+  transform: translateY(20px);
   background: rgba(30,30,30,0.95);
   border: 1px solid var(--brand);
   color: #fff;
@@ -533,7 +533,7 @@ kbd {
 }
 .toast.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
 }
 .toast.hidden { display: none; }
 
