@@ -136,7 +136,7 @@ let qtdTemporariaModal = 0;
 function abrirModalProduto(idx) {
   const cat = AC.categoriaAtual || cardapio.categorias[AC.catIdx];
   produtoSelecionado = cat.itens[idx];
-  qtdTemporariaModal = qtdNoCarrinho(produtoSelecionado.nome);
+  qtdTemporariaModal = 1;
   
   document.getElementById('modal-produto-nome').textContent = produtoSelecionado.nome;
   document.getElementById('modal-produto-descricao').textContent = produtoSelecionado.descricao;
@@ -153,17 +153,25 @@ function fecharModalProduto() {
 
 function confirmarModalProduto() {
   if (!produtoSelecionado) return;
-  const diferenca = qtdTemporariaModal - qtdNoCarrinho(produtoSelecionado.nome);
-  if (diferenca !== 0) {
-    alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, diferenca);
+  if (qtdTemporariaModal > 0) {
+    alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, qtdTemporariaModal);
   }
   fecharModalProduto();
 }
 
+const MAX_ESTOQUE = 10;
+
 function alterarQtdModal(delta) {
   if (!produtoSelecionado) return;
+  
+  if (delta > 0 && qtdTemporariaModal >= MAX_ESTOQUE) {
+    mostrarToast("Quantidade máxima atingido");
+    return;
+  }
+  
   qtdTemporariaModal += delta;
   if (qtdTemporariaModal < 0) qtdTemporariaModal = 0;
+  
   document.getElementById('modal-produto-qtd').textContent = qtdTemporariaModal;
 }
 
@@ -553,34 +561,41 @@ function acessivelSelecionar() {
     AC.fase = 'modal_produto';
     AC.itemIdx = 0; // Adicionar por padrão
     produtoSelecionado = prod;
-    qtdTemporariaModal = qtdNoCarrinho(prod.nome);
+    qtdTemporariaModal = 1;
     atualizarInfoAcessivel();
-    falar(`Produto ${prod.nome} selecionado. Valor ${falarPreco(prod.preco)}. Você tem ${qtdTemporariaModal} selecionados. Opção atual: Adicionar uma unidade. Clique curto para ver mais opções. Clique longo para selecionar. Duplo clique para cancelar.`, true);
+    falar(`Produto ${prod.nome} selecionado. Valor ${falarPreco(prod.preco)}. Você tem ${qtdTemporariaModal} selecionado para adicionar. Opção atual: Adicionar uma unidade. Clique curto para ver mais opções. Clique longo para selecionar. Duplo clique para cancelar.`, true);
     return;
   }
 
   if (AC.fase === 'modal_produto') {
     if (AC.itemIdx === 0) {
-      qtdTemporariaModal++;
-      atualizarInfoAcessivel();
-      falar(`Unidade adicionada. Quantidade selecionada: ${qtdTemporariaModal}.`, true);
+      if (qtdTemporariaModal >= MAX_ESTOQUE) {
+        falar(`Não há mais produtos para adicionar daquele produto específico.`, true);
+      } else {
+        qtdTemporariaModal++;
+        atualizarInfoAcessivel();
+        falar(`Unidade adicionada. Quantidade atual: ${qtdTemporariaModal}.`, true);
+      }
     } else if (AC.itemIdx === 1) {
       if (qtdTemporariaModal > 0) {
         qtdTemporariaModal--;
         atualizarInfoAcessivel();
-        falar(`Unidade removida. Quantidade selecionada: ${qtdTemporariaModal}.`, true);
+        falar(`Unidade removida. Quantidade atual: ${qtdTemporariaModal}.`, true);
       } else {
-        falar(`Quantidade já é zero.`, true);
+        falar(`Não há produtos para remover.`, true);
       }
     } else if (AC.itemIdx === 2) {
-      const diferenca = qtdTemporariaModal - qtdNoCarrinho(produtoSelecionado.nome);
-      if (diferenca !== 0) {
-        alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, diferenca);
+      let msg = "";
+      if (qtdTemporariaModal > 0) {
+        alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, qtdTemporariaModal);
+        msg = `${qtdTemporariaModal} ${produtoSelecionado.nome} adicionado(s) ao carrinho. `;
+      } else {
+        msg = "Nenhum item adicionado ao carrinho. ";
       }
       AC.fase = 'produtos';
       produtoSelecionado = null;
       atualizarInfoAcessivel();
-      falar(`Alterações salvas. Voltando para lista de produtos. Produto atual: ${cardapio.categorias[AC.catIdx].itens[AC.prodIdx].nome}.`, true);
+      falar(`${msg}Voltando para lista de produtos. Produto atual: ${cardapio.categorias[AC.catIdx].itens[AC.prodIdx].nome}.`, true);
     }
     return;
   }
