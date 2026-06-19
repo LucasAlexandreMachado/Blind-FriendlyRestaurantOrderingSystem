@@ -293,8 +293,13 @@ function finalizarPedido() {
   document.getElementById('numero-pedido').textContent = `#${num}`;
   carrinho = [];
   atualizarContadores();
-  mostrarTela('sucesso');
-  falar(`Pedido número ${num} realizado com sucesso! Aguarde ser chamado no balcão.`);
+  
+  mostrarTela('loading');
+  
+  setTimeout(() => {
+    mostrarTela('sucesso');
+    falar(`Pedido número ${num} realizado com sucesso! Aguarde ser chamado no balcão.`);
+  }, 2000);
 }
 
 function novoAtendimento() {
@@ -694,15 +699,16 @@ function finalizarPedidoAcessivel() {
   const num = String(Math.floor(Math.random() * 900) + 100);
   document.getElementById('numero-pedido').textContent = `#${num}`;
   carrinho = [];
-  AC.fase = 'categorias';
-  AC.catIdx = 0;
-  atualizarInfoAcessivel();
-  falar(`Pedido número ${num} realizado com sucesso! Aguarde ser chamado no balcão. Obrigado por usar o modo acessível.`, true);
-  // Fecha overlay depois de um tempo
+  atualizarContadores();
+  
+  sairModoAcessivel();
+  mostrarTela('loading');
+  falar('Processando seu pedido, aguarde um momento...', true);
+
   setTimeout(() => {
-    sairModoAcessivel();
     mostrarTela('sucesso');
-  }, 5000);
+    falar(`Pedido número ${num} realizado com sucesso! Aguarde ser chamado no balcão. Obrigado por usar o modo acessível.`, true);
+  }, 2500);
 }
 
 /* ════════════════════════════════════════════════════════
