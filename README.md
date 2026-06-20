@@ -64,10 +64,6 @@ python -m http.server 8000
 # Com Python 2
 python -m SimpleHTTPServer 8000
 
-# Com Node.js (http-server)
-npm install -g http-server
-http-server
-
 # Com Live Server (VS Code)
 # Instale extensão "Live Server" e clique em "Go Live"
 ```
