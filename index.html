@@ -122,7 +122,18 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════
-     TELA 5 — SUCESSO
+     TELA 5 — LOADING
+═══════════════════════════════════════════════ -->
+<div id="tela-loading" class="tela">
+  <div class="loading-content">
+    <div class="spinner"></div>
+    <h1>Processando seu pedido...</h1>
+    <p>Por favor, aguarde um momento.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TELA 6 — SUCESSO
 ═══════════════════════════════════════════════ -->
 <div id="tela-sucesso" class="tela">
   <div class="sucesso-content">
@@ -172,6 +183,29 @@
 
   <div class="acessivel-carrinho-info" id="acessivel-carrinho-info">
     🛒 <span id="acessivel-qtd">0</span> itens — Total: <span id="acessivel-total">R$ 0,00</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MODAL PRODUTO
+═══════════════════════════════════════════════ -->
+<div id="modal-produto" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button class="btn-fechar-modal" onclick="fecharModalProduto()">✕</button>
+    <h2 id="modal-produto-nome">Nome</h2>
+    <p id="modal-produto-descricao">Descrição</p>
+    <div class="modal-produto-preco" id="modal-produto-preco">R$ 0,00</div>
+    
+    <div class="modal-controles-container">
+      <span class="modal-label">Quantidade no carrinho:</span>
+      <div class="modal-controles">
+        <button class="btn-menos" onclick="alterarQtdModal(-1)">−</button>
+        <span class="produto-qtd-label" id="modal-produto-qtd">0</span>
+        <button class="btn-mais" onclick="alterarQtdModal(1)">+</button>
+      </div>
+    </div>
+    
+    <button class="btn-primary btn-modal-acao" onclick="confirmarModalProduto()">✔ Concluir</button>
   </div>
 </div>
 
