@@ -121,6 +121,7 @@ function renderizarProdutos(cat) {
     card.className = 'produto-card';
     card.id = `prod-card-${i}`;
     card.innerHTML = `
+      ${item.imagem ? `<img class="produto-img" src="${item.imagem}" alt="${item.nome}" onerror="this.style.display='none'">` : ''}
       <div class="produto-nome">${item.nome}</div>
       <div class="produto-descricao">${item.descricao}</div>
       <div class="produto-preco">${formatarPreco(item.preco)}</div>
@@ -142,6 +143,15 @@ function abrirModalProduto(idx) {
   document.getElementById('modal-produto-descricao').textContent = produtoSelecionado.descricao;
   document.getElementById('modal-produto-preco').textContent = formatarPreco(produtoSelecionado.preco);
   document.getElementById('modal-produto-qtd').textContent = qtdTemporariaModal;
+
+  const imgEl = document.getElementById('modal-produto-img');
+  if (produtoSelecionado.imagem) {
+    imgEl.src = produtoSelecionado.imagem;
+    imgEl.alt = produtoSelecionado.nome;
+    imgEl.style.display = 'block';
+  } else {
+    imgEl.style.display = 'none';
+  }
   
   document.getElementById('modal-produto').classList.add('show');
 }
