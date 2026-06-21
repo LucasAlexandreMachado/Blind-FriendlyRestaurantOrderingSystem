@@ -32,6 +32,7 @@ const LONGO_MS     = 600;
 ════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
   await carregarCardapio();
+  aplicarTraducoes();
   mostrarTela('welcome');
 });
 
@@ -75,7 +76,7 @@ function irParaCarrinho() {
 
 function irParaConfirmacao() {
   if (carrinho.length === 0) {
-    mostrarToast('⚠ Adicione itens ao carrinho primeiro');
+    mostrarToast(t('toast_carrinho_vazio'));
     return;
   }
   renderizarConfirmacao();
@@ -93,8 +94,8 @@ function renderizarCategorias() {
     card.className = 'categoria-card';
     card.innerHTML = `
       <div class="categoria-emoji">${cat.emoji}</div>
-      <div class="categoria-nome">${cat.nome}</div>
-      <div class="categoria-qtd">${cat.itens.length} itens</div>
+      <div class="categoria-nome">${nomeCat(cat)}</div>
+      <div class="categoria-qtd">${cat.itens.length} ${t('ac_itens')}</div>
     `;
     card.addEventListener('click', () => selecionarCategoria(i));
     grid.appendChild(card);
@@ -105,7 +106,7 @@ function selecionarCategoria(idx) {
   AC.categoriaAtual = cardapio.categorias[idx];
   AC.catIdx = idx;
   document.getElementById('titulo-categoria').textContent =
-    `${AC.categoriaAtual.emoji} ${AC.categoriaAtual.nome}`;
+    `${AC.categoriaAtual.emoji} ${nomeCat(AC.categoriaAtual)}`;
   renderizarProdutos(AC.categoriaAtual);
   mostrarTela('produtos');
 }
@@ -121,10 +122,10 @@ function renderizarProdutos(cat) {
     card.className = 'produto-card';
     card.id = `prod-card-${i}`;
     card.innerHTML = `
-      ${item.imagem ? `<img class="produto-img" src="${item.imagem}" alt="${item.nome}" onerror="this.style.display='none'">` : ''}
-      <div class="produto-nome">${item.nome}</div>
-      <div class="produto-descricao">${item.descricao}</div>
-      <div class="produto-preco">${formatarPreco(item.preco)}</div>
+      ${item.imagem ? `<img class="produto-img" src="${item.imagem}" alt="${nomeItem(item)}" onerror="this.style.display='none'">` : ''}
+      <div class="produto-nome">${nomeItem(item)}</div>
+      <div class="produto-descricao">${descItem(item)}</div>
+      <div class="produto-preco">${formatarPrecoI18n(item.preco)}</div>
     `;
     card.onclick = () => abrirModalProduto(i);
     grid.appendChild(card);
@@ -139,9 +140,9 @@ function abrirModalProduto(idx) {
   produtoSelecionado = cat.itens[idx];
   qtdTemporariaModal = 1;
   
-  document.getElementById('modal-produto-nome').textContent = produtoSelecionado.nome;
-  document.getElementById('modal-produto-descricao').textContent = produtoSelecionado.descricao;
-  document.getElementById('modal-produto-preco').textContent = formatarPreco(produtoSelecionado.preco);
+  document.getElementById('modal-produto-nome').textContent = nomeItem(produtoSelecionado);
+  document.getElementById('modal-produto-descricao').textContent = descItem(produtoSelecionado);
+  document.getElementById('modal-produto-preco').textContent = formatarPrecoI18n(produtoSelecionado.preco);
   document.getElementById('modal-produto-qtd').textContent = qtdTemporariaModal;
 
   const imgEl = document.getElementById('modal-produto-img');
@@ -164,7 +165,7 @@ function fecharModalProduto() {
 function confirmarModalProduto() {
   if (!produtoSelecionado) return;
   if (qtdTemporariaModal > 0) {
-    alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, qtdTemporariaModal);
+    alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, qtdTemporariaModal, produtoSelecionado.nome_en);
   }
   fecharModalProduto();
 }
@@ -173,9 +174,9 @@ const MAX_ESTOQUE = 10;
 
 function alterarQtdModal(delta) {
   if (!produtoSelecionado) return;
-  
+
   if (delta > 0 && qtdTemporariaModal >= MAX_ESTOQUE) {
-    mostrarToast("Quantidade máxima atingido");
+    mostrarToast(t('toast_max_estoque'));
     return;
   }
   
@@ -188,20 +189,20 @@ function alterarQtdModal(delta) {
 /* ════════════════════════════════════════════════════════
    CARRINHO — LÓGICA
 ════════════════════════════════════════════════════════ */
-function alterarCarrinho(nome, preco, delta) {
+function alterarCarrinho(nome, preco, delta, nome_en = '') {
   const idx = carrinho.findIndex(i => i.nome === nome);
   if (idx === -1) {
     if (delta > 0) {
-      carrinho.push({ nome, preco, qtd: delta });
-      mostrarToast(`✔ ${nome} adicionado`);
+      carrinho.push({ nome, nome_en, preco, qtd: delta });
+      mostrarToast(t('toast_adicionado', { nome: nomeCarrinho({ nome, nome_en }) }));
     }
   } else {
     carrinho[idx].qtd += delta;
     if (carrinho[idx].qtd <= 0) {
       carrinho.splice(idx, 1);
-      mostrarToast(`✕ ${nome} removido`);
+      mostrarToast(t('toast_removido', { nome: nomeCarrinho({ nome, nome_en }) }));
     } else if (delta > 0) {
-      mostrarToast(`✔ ${nome} adicionado`);
+      mostrarToast(t('toast_adicionado', { nome: nomeCarrinho({ nome, nome_en }) }));
     }
   }
   atualizarContadores();
@@ -239,11 +240,11 @@ function renderizarCarrinho() {
     lista.innerHTML = `
       <div class="carrinho-vazio">
         <div class="carrinho-vazio-icon">🛒</div>
-        <p>Seu carrinho está vazio.</p>
-        <button class="btn-primary" onclick="irParaCategorias()">Ver Cardápio</button>
+        <p>${t('carrinho_vazio_msg')}</p>
+        <button class="btn-primary" onclick="irParaCategorias()">${t('carrinho_ver')}</button>
       </div>`;
-    document.getElementById('resumo-subtotal').textContent = 'R$ 0,00';
-    document.getElementById('resumo-total').textContent = 'R$ 0,00';
+    document.getElementById('resumo-subtotal').textContent = formatarPrecoI18n(0);
+    document.getElementById('resumo-total').textContent = formatarPrecoI18n(0);
     return;
   }
 
@@ -252,22 +253,22 @@ function renderizarCarrinho() {
     div.className = 'item-carrinho';
     div.innerHTML = `
       <div class="item-info">
-        <div class="item-nome">${item.nome}</div>
-        <div class="item-unit">${formatarPreco(item.preco)} / unidade</div>
+        <div class="item-nome">${nomeCarrinho(item)}</div>
+        <div class="item-unit">${formatarPrecoI18n(item.preco)} ${t('item_unidade')}</div>
       </div>
       <div class="item-controles">
         <button class="btn-menos" onclick="alterarItemCarrinho(${idx},-1)">−</button>
         <span class="produto-qtd-label">${item.qtd}</span>
         <button class="btn-mais" onclick="alterarItemCarrinho(${idx},+1)">+</button>
       </div>
-      <div class="item-subtotal">${formatarPreco(item.preco * item.qtd)}</div>
+      <div class="item-subtotal">${formatarPrecoI18n(item.preco * item.qtd)}</div>
     `;
     lista.appendChild(div);
   });
 
   const total = totalCarrinho();
-  document.getElementById('resumo-subtotal').textContent = formatarPreco(total);
-  document.getElementById('resumo-total').textContent = formatarPreco(total);
+  document.getElementById('resumo-subtotal').textContent = formatarPrecoI18n(total);
+  document.getElementById('resumo-total').textContent = formatarPrecoI18n(total);
 }
 
 function alterarItemCarrinho(idx, delta) {
@@ -287,12 +288,12 @@ function renderizarConfirmacao() {
     const div = document.createElement('div');
     div.className = 'confirmacao-item';
     div.innerHTML = `
-      <span>${item.qtd}× ${item.nome}</span>
+      <span>${item.qtd}× ${nomeCarrinho(item)}</span>
       <span>${formatarPreco(item.preco * item.qtd)}</span>
     `;
     lista.appendChild(div);
   });
-  document.getElementById('confirmacao-total-val').textContent = formatarPreco(totalCarrinho());
+  document.getElementById('confirmacao-total-val').textContent = formatarPrecoI18n(totalCarrinho());
 }
 
 /* ════════════════════════════════════════════════════════
@@ -319,19 +320,41 @@ function novoAtendimento() {
   mostrarTela('welcome');
 }
 
+function rerenderTelaAtual() {
+  if (telaAtual === 'categorias') renderizarCategorias();
+  else if (telaAtual === 'produtos' && AC.categoriaAtual) renderizarProdutos(AC.categoriaAtual);
+  else if (telaAtual === 'carrinho') renderizarCarrinho();
+  else if (telaAtual === 'confirmacao') renderizarConfirmacao();
+}
+
+/* ════════════════════════════════════════════════════════
+   HELPERS DE LOCALIZAÇÃO DO CARDÁPIO
+════════════════════════════════════════════════════════ */
+function nomeCat(cat)    { return idiomaAtual === 'en-US' && cat.nome_en        ? cat.nome_en        : cat.nome; }
+function nomeItem(item)  { return idiomaAtual === 'en-US' && item.nome_en       ? item.nome_en       : item.nome; }
+function descItem(item)  { return idiomaAtual === 'en-US' && item.descricao_en  ? item.descricao_en  : item.descricao; }
+function nomeCarrinho(it){ return idiomaAtual === 'en-US' && it.nome_en         ? it.nome_en         : it.nome; }
+
 /* ════════════════════════════════════════════════════════
    TOAST
 ════════════════════════════════════════════════════════ */
 let toastTimer = null;
+/* ════════════════════════════════════════════════════════
+   FORMATAÇÃO DE PREÇO — adapta locale por idioma
+════════════════════════════════════════════════════════ */
+function formatarPrecoI18n(valor) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
 function mostrarToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.remove('hidden');
-  t.classList.add('show');
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  el.classList.add('show');
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
-    t.classList.remove('show');
-    setTimeout(() => t.classList.add('hidden'), 350);
+    el.classList.remove('show');
+    setTimeout(() => el.classList.add('hidden'), 350);
   }, 2000);
 }
 
@@ -342,14 +365,14 @@ function falar(texto, urgente = false) {
   if (!window.speechSynthesis) return;
   if (urgente) window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(texto);
-  utter.lang = 'pt-BR';
+  utter.lang = t('lang_tts');
   utter.rate = 0.95;
   utter.pitch = 1.0;
   utter.volume = 1.0;
 
-  // Tenta selecionar voz pt-BR
   const vozes = speechSynthesis.getVoices();
-  const voz = vozes.find(v => v.lang.startsWith('pt')) || null;
+  const langPrefix = idiomaAtual === 'en-US' ? 'en' : 'pt';
+  const voz = vozes.find(v => v.lang.startsWith(langPrefix)) || null;
   if (voz) utter.voice = voz;
 
   window.speechSynthesis.speak(utter);
@@ -369,7 +392,7 @@ function ativarModoAcessivel() {
 
   document.getElementById('overlay-acessivel').classList.remove('hidden');
   atualizarInfoAcessivel();
-  falar('Bem-vindo ao modo acessível. Você está no Menu Principal. Primeira opção: Ver Cardápio. Utilize clique curto para avançar. Clique longo para selecionar. Duplo clique para voltar.', true);
+  falar(t('fala_bemvindo'), true);
 }
 
 function sairModoAcessivel() {
@@ -389,95 +412,91 @@ function atualizarInfoAcessivel() {
   const qtdEl    = document.getElementById('acessivel-qtd');
   const totalEl  = document.getElementById('acessivel-total');
   qtdEl.textContent  = totalItens();
-  totalEl.textContent = formatarPreco(totalCarrinho());
+  totalEl.textContent = formatarPrecoI18n(totalCarrinho());
 
   if (AC.fase === 'menu_principal') {
-    statusEl.textContent = 'Menu Principal';
+    statusEl.textContent = t('ac_status_menu');
     if (AC.menuIdx === 0) {
-      itemEl.textContent = '📖 Ver Cardápio';
-      descEl.textContent = 'Navegar pelas categorias e produtos';
+      itemEl.textContent = t('ac_item_ver_cardapio');
+      descEl.textContent = t('ac_item_ver_cardapio_desc');
     } else {
-      itemEl.textContent = `🛒 Ver Carrinho (${totalItens()} itens)`;
-      descEl.textContent = `Ir para o carrinho e finalizar. Total: ${formatarPreco(totalCarrinho())}`;
+      itemEl.textContent = t('ac_item_ver_carrinho', { qtd: totalItens() });
+      descEl.textContent = t('ac_item_ver_carrinho_desc', { total: formatarPrecoI18n(totalCarrinho()) });
     }
     return;
   }
 
   if (AC.fase === 'categorias') {
     const cat = cardapio.categorias[AC.catIdx];
-    statusEl.textContent = 'Escolha a categoria';
-    itemEl.textContent   = `${cat.emoji}  ${cat.nome}`;
-    descEl.textContent   = `${cat.itens.length} itens disponíveis`;
+    statusEl.textContent = t('ac_status_cats');
+    itemEl.textContent   = `${cat.emoji}  ${nomeCat(cat)}`;
+    descEl.textContent   = `${cat.itens.length} ${t('ac_itens')}`;
     return;
   }
 
   if (AC.fase === 'produtos') {
     const cat  = cardapio.categorias[AC.catIdx];
     const prod = cat.itens[AC.prodIdx];
-    statusEl.textContent = `Categoria: ${cat.nome}`;
-    itemEl.textContent   = prod.nome;
-    descEl.textContent   = `${prod.descricao} — ${formatarPreco(prod.preco)}`;
+    statusEl.textContent = t('ac_status_prod', { nome: nomeCat(cat) });
+    itemEl.textContent   = nomeItem(prod);
+    descEl.textContent   = `${descItem(prod)} — ${formatarPrecoI18n(prod.preco)}`;
     return;
   }
 
   if (AC.fase === 'modal_produto') {
-    statusEl.textContent = `Produto: ${produtoSelecionado.nome}`;
-    const descOp = [
-      'Adicionar +1',
-      'Remover -1',
-      'Concluir (Fechar)'
-    ];
-    itemEl.textContent = descOp[AC.itemIdx];
-    descEl.textContent = `Selecionado: ${qtdTemporariaModal}`;
+    statusEl.textContent = t('ac_status_modal', { nome: nomeItem(produtoSelecionado) });
+    const ops = t('ac_modal_op');
+    itemEl.textContent = ops[AC.itemIdx];
+    descEl.textContent = t('ac_modal_qtd_sel', { qtd: qtdTemporariaModal });
     return;
   }
 
   if (AC.fase === 'carrinho') {
     if (carrinho.length === 0) {
-      statusEl.textContent = 'Carrinho';
-      itemEl.textContent   = 'Carrinho vazio';
-      descEl.textContent   = 'Duplo clique para voltar ao cardápio';
+      statusEl.textContent = t('ac_status_confirmar').replace('Confirmação', 'Carrinho').replace('Confirmation', 'Cart');
+      itemEl.textContent   = t('ac_carrinho_vazio_item');
+      descEl.textContent   = t('ac_carrinho_vazio_desc');
       return;
     }
     const op = carrinhoOpcoes();
     const cur = op[AC.itemIdx];
-    statusEl.textContent = `Carrinho — ${totalItens()} itens`;
+    statusEl.textContent = t('ac_status_carrinho', { qtd: totalItens() });
     itemEl.textContent   = cur.label;
     descEl.textContent   = cur.descVis;
     return;
   }
 
   if (AC.fase === 'confirmar') {
-    statusEl.textContent = 'Confirmação';
-    itemEl.textContent   = 'Confirmar pedido?';
-    descEl.textContent   = `Total: ${formatarPreco(totalCarrinho())}`;
+    statusEl.textContent = t('ac_status_confirmar');
+    itemEl.textContent   = t('ac_item_confirmar');
+    descEl.textContent   = t('ac_item_confirmar_desc', { total: formatarPrecoI18n(totalCarrinho()) });
   }
 }
 
 function carrinhoOpcoes() {
   const ops = [];
-  ops.push({ 
-    label: 'Finalizar Pedido', 
-    descVis: `Total: ${formatarPreco(totalCarrinho())}`,
-    descFala: `Valor total do pedido: ${falarPreco(totalCarrinho())}. Clique longo para ir para a confirmação.`,
-    tipo: 'finalizar' 
+  ops.push({
+    label: t('ac_finalizar_label'),
+    descVis: t('ac_finalizar_desc', { total: formatarPrecoI18n(totalCarrinho()) }),
+    descFala: `${falarPreco(totalCarrinho())}. ${t('fala_finalizar_desc')}`,
+    tipo: 'finalizar'
   });
 
   carrinho.forEach(it => {
     ops.push({
       label: `${it.qtd}× ${it.nome}`,
-      descVis: `Subtotal: ${formatarPreco(it.preco * it.qtd)}`,
-      descFala: `Subtotal: ${falarPreco(it.preco * it.qtd)}. Clique longo para remover uma unidade deste item.`,
+      descVis: t('ac_finalizar_desc', { total: formatarPrecoI18n(it.preco * it.qtd) }),
+      descFala: t('fala_item_desc', { sub: falarPreco(it.preco * it.qtd) }),
       tipo:  'item',
       ref:   it,
     });
   });
 
-  ops.push({ 
-    label: 'Continuar Comprando', 
-    descVis: 'Voltar ao cardápio',
-    descFala: 'Clique longo para voltar ao cardápio.',
-    tipo: 'continuar' 
+  ops.push({
+    label: t('ac_continuar_label'),
+    descVis: t('ac_continuar_desc'),
+    descFala: t('fala_continuar_desc'),
+    tipo: 'continuar'
   });
   return ops;
 }
@@ -490,9 +509,9 @@ function acessivelAvancar() {
     AC.menuIdx = (AC.menuIdx + 1) % 2;
     atualizarInfoAcessivel();
     if (AC.menuIdx === 0) {
-      falar('Opção: Ver Cardápio. Clique longo para abrir as categorias.', true);
+      falar(t('fala_menu_cardapio'), true);
     } else {
-      falar(`Opção: Ver Carrinho e Finalizar. Você tem ${totalItens()} itens. Total: ${falarPreco(totalCarrinho())}.`, true);
+      falar(t('fala_menu_carrinho', { qtd: totalItens(), total: falarPreco(totalCarrinho()) }), true);
     }
     return;
   }
@@ -501,7 +520,7 @@ function acessivelAvancar() {
     AC.catIdx = (AC.catIdx + 1) % cardapio.categorias.length;
     atualizarInfoAcessivel();
     const cat = cardapio.categorias[AC.catIdx];
-    falar(`Categoria: ${cat.nome}. ${cat.itens.length} itens.`, true);
+    falar(t('fala_cat', { nome: nomeCat(cat), qtd: cat.itens.length }), true);
     return;
   }
 
@@ -510,32 +529,28 @@ function acessivelAvancar() {
     AC.prodIdx = (AC.prodIdx + 1) % cat.itens.length;
     atualizarInfoAcessivel();
     const prod = cat.itens[AC.prodIdx];
-    falar(`${prod.nome}. ${prod.descricao}. Valor ${falarPreco(prod.preco)}. Clique longo para ver opções.`, true);
+    falar(t('fala_prod', { nome: nomeItem(prod), desc: descItem(prod), preco: falarPreco(prod.preco) }), true);
     return;
   }
 
   if (AC.fase === 'modal_produto') {
     AC.itemIdx = (AC.itemIdx + 1) % 3;
-    const opcoes = [
-      'Adicionar uma unidade.',
-      'Remover uma unidade.',
-      'Concluir e fechar.'
-    ];
+    const opcoes = [t('fala_op_adicionar'), t('fala_op_remover'), t('fala_op_concluir')];
     atualizarInfoAcessivel();
-    falar(`Opção: ${opcoes[AC.itemIdx]} Clique longo para confirmar.`, true);
+    falar(t('fala_opcao', { op: opcoes[AC.itemIdx] }), true);
     return;
   }
 
   if (AC.fase === 'carrinho') {
     if (carrinho.length === 0) {
-      falar('Seu carrinho está vazio. Duplo clique para voltar.', true);
+      falar(t('fala_carrinho_vazio'), true);
       return;
     }
     const ops = carrinhoOpcoes();
     AC.itemIdx = (AC.itemIdx + 1) % ops.length;
     atualizarInfoAcessivel();
     const cur = ops[AC.itemIdx];
-    falar(`Opção: ${cur.label}. ${cur.descFala}`, true);
+    falar(t('fala_opcao_nav', { label: cur.label, desc: cur.descFala }), true);
     return;
   }
 }
@@ -547,17 +562,17 @@ function acessivelSelecionar() {
       AC.catIdx = 0;
       atualizarInfoAcessivel();
       const cat = cardapio.categorias[0];
-      falar(`Cardápio aberto. Primeira categoria: ${cat.nome}. ${cat.itens.length} itens.`, true);
+      falar(t('fala_cardapio_aberto', { nome: cat.nome, qtd: cat.itens.length }), true);
     } else {
       AC.fase = 'carrinho';
       AC.itemIdx = 0;
       atualizarInfoAcessivel();
       if (carrinho.length === 0) {
-        falar('Seu carrinho está vazio. Adicione itens antes de tentar finalizar. Duplo clique para voltar ao menu principal.', true);
+        falar(t('fala_carrinho_vazio_finalizar'), true);
       } else {
         const ops = carrinhoOpcoes();
         const cur = ops[0];
-        falar(`Você entrou no carrinho com ${totalItens()} itens. Valor total: ${falarPreco(totalCarrinho())}. Dê um clique curto para navegar e remover itens. Primeira opção: ${cur.label}. ${cur.descFala}`, true);
+        falar(t('fala_entrou_carrinho', { qtd: totalItens(), total: falarPreco(totalCarrinho()), label: cur.label, desc: cur.descFala }), true);
       }
     }
     return;
@@ -569,7 +584,7 @@ function acessivelSelecionar() {
     AC.prodIdx = 0;
     atualizarInfoAcessivel();
     const prod = cat.itens[0];
-    falar(`Categoria ${cat.nome} selecionada. Primeiro item: ${prod.nome}. ${falarPreco(prod.preco)}.`, true);
+    falar(t('fala_cat_selecionada', { nome: nomeCat(cat), prod: nomeItem(prod), preco: falarPreco(prod.preco) }), true);
     return;
   }
 
@@ -577,50 +592,50 @@ function acessivelSelecionar() {
     const cat  = cardapio.categorias[AC.catIdx];
     const prod = cat.itens[AC.prodIdx];
     AC.fase = 'modal_produto';
-    AC.itemIdx = 0; // Adicionar por padrão
+    AC.itemIdx = 0;
     produtoSelecionado = prod;
     qtdTemporariaModal = 1;
     atualizarInfoAcessivel();
-    falar(`Produto ${prod.nome} selecionado. Valor ${falarPreco(prod.preco)}. Você tem ${qtdTemporariaModal} selecionado para adicionar. Opção atual: Adicionar uma unidade. Clique curto para ver mais opções. Clique longo para selecionar. Duplo clique para cancelar.`, true);
+    falar(t('fala_prod_selecionado', { nome: nomeItem(prod), preco: falarPreco(prod.preco), qtd: qtdTemporariaModal }), true);
     return;
   }
 
   if (AC.fase === 'modal_produto') {
     if (AC.itemIdx === 0) {
       if (qtdTemporariaModal >= MAX_ESTOQUE) {
-        falar(`Não há mais produtos para adicionar daquele produto específico.`, true);
+        falar(t('fala_max_estoque'), true);
       } else {
         qtdTemporariaModal++;
         atualizarInfoAcessivel();
-        falar(`Unidade adicionada. Quantidade atual: ${qtdTemporariaModal}.`, true);
+        falar(t('fala_unidade_add', { qtd: qtdTemporariaModal }), true);
       }
     } else if (AC.itemIdx === 1) {
       if (qtdTemporariaModal > 0) {
         qtdTemporariaModal--;
         atualizarInfoAcessivel();
-        falar(`Unidade removida. Quantidade atual: ${qtdTemporariaModal}.`, true);
+        falar(t('fala_unidade_rem', { qtd: qtdTemporariaModal }), true);
       } else {
-        falar(`Não há produtos para remover.`, true);
+        falar(t('fala_sem_remover'), true);
       }
     } else if (AC.itemIdx === 2) {
-      let msg = "";
+      let msg = '';
       if (qtdTemporariaModal > 0) {
-        alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, qtdTemporariaModal);
-        msg = `${qtdTemporariaModal} ${produtoSelecionado.nome} adicionado(s) ao carrinho. `;
+        alterarCarrinho(produtoSelecionado.nome, produtoSelecionado.preco, qtdTemporariaModal, produtoSelecionado.nome_en);
+        msg = t('fala_concluir_add', { qtd: qtdTemporariaModal, nome: nomeItem(produtoSelecionado) });
       } else {
-        msg = "Nenhum item adicionado ao carrinho. ";
+        msg = t('fala_concluir_nada');
       }
       AC.fase = 'produtos';
       produtoSelecionado = null;
       atualizarInfoAcessivel();
-      falar(`${msg}Voltando para lista de produtos. Produto atual: ${cardapio.categorias[AC.catIdx].itens[AC.prodIdx].nome}.`, true);
+      falar(`${msg}${t('fala_volta_produtos', { nome: nomeItem(cardapio.categorias[AC.catIdx].itens[AC.prodIdx]) })}`, true);
     }
     return;
   }
 
   if (AC.fase === 'carrinho') {
     if (carrinho.length === 0) {
-      falar('Seu carrinho está vazio. Duplo clique para voltar.', true);
+      falar(t('fala_carrinho_vazio'), true);
       return;
     }
     const ops = carrinhoOpcoes();
@@ -628,19 +643,18 @@ function acessivelSelecionar() {
     if (cur.tipo === 'finalizar') {
       AC.fase = 'confirmar';
       atualizarInfoAcessivel();
-      falar(`Confirmar pedido? Total: ${falarPreco(totalCarrinho())}. Clique longo para confirmar. Duplo clique para voltar.`, true);
+      falar(t('fala_confirmar', { total: falarPreco(totalCarrinho()) }), true);
     } else if (cur.tipo === 'continuar') {
       AC.fase = 'categorias';
       AC.catIdx = 0;
       atualizarInfoAcessivel();
-      falar('Voltando ao cardápio. Navegue pelas categorias.', true);
+      falar(t('fala_volta_cat_ir'), true);
     } else {
-      // Remove uma unidade do item
       const it = cur.ref;
-      alterarCarrinho(it.nome, it.preco, -1);
+      alterarCarrinho(it.nome, it.preco, -1, it.nome_en);
       AC.itemIdx = Math.min(AC.itemIdx, carrinhoOpcoes().length - 1);
       atualizarInfoAcessivel();
-      falar(`${it.nome} removido. Carrinho: ${totalItens()} itens.`, true);
+      falar(t('fala_item_removido', { nome: nomeCarrinho(it), qtd: totalItens() }), true);
     }
     return;
   }
@@ -652,18 +666,16 @@ function acessivelSelecionar() {
 
 let _ultimoVoltar = 0;
 function voltarAcessivel() {
-  // Evita duplo disparo acidental num intervalo menor que 800ms
   if (Date.now() - _ultimoVoltar < 800) return;
   _ultimoVoltar = Date.now();
 
-  // Garante que qualquer fala anterior seja cancelada antes de falar o destino
   if (window.speechSynthesis) window.speechSynthesis.cancel();
 
   if (AC.fase === 'modal_produto') {
     AC.fase = 'produtos';
     produtoSelecionado = null;
     atualizarInfoAcessivel();
-    falar(`Cancelado. Nenhuma alteração foi feita. Você voltou para a lista de produtos. Produto atual: ${cardapio.categorias[AC.catIdx].itens[AC.prodIdx].nome}.`, true);
+    falar(t('fala_cancelado', { nome: nomeItem(cardapio.categorias[AC.catIdx].itens[AC.prodIdx]) }), true);
     return;
   }
 
@@ -671,7 +683,7 @@ function voltarAcessivel() {
     const cat = cardapio.categorias[AC.catIdx];
     AC.fase = 'categorias';
     atualizarInfoAcessivel();
-    falar(`Voltou para o cardápio. Categoria atual: ${cat.nome}. Clique curto para mudar de categoria. Clique longo para entrar na categoria.`, true);
+    falar(t('fala_volta_categorias', { nome: nomeCat(cat) }), true);
     return;
   }
 
@@ -679,7 +691,7 @@ function voltarAcessivel() {
     AC.fase = 'menu_principal';
     AC.menuIdx = 1;
     atualizarInfoAcessivel();
-    falar(`Voltou para o menu principal. Opção atual: Ver Carrinho.`, true);
+    falar(t('fala_volta_menu_carrinho'), true);
     return;
   }
 
@@ -687,7 +699,7 @@ function voltarAcessivel() {
     AC.fase = 'carrinho';
     AC.itemIdx = 0;
     atualizarInfoAcessivel();
-    falar(`Voltou para o carrinho. Você tem ${totalItens()} itens. Total: ${falarPreco(totalCarrinho())}. Clique curto para navegar pelos itens.`, true);
+    falar(t('fala_volta_carrinho', { qtd: totalItens(), total: falarPreco(totalCarrinho()) }), true);
     return;
   }
 
@@ -695,12 +707,12 @@ function voltarAcessivel() {
     AC.fase = 'menu_principal';
     AC.menuIdx = 0;
     atualizarInfoAcessivel();
-    falar(`Voltou para o menu principal. Opção atual: Ver Cardápio.`, true);
+    falar(t('fala_volta_menu_cardapio'), true);
     return;
   }
 
   if (AC.fase === 'menu_principal') {
-    falar('Você já está no menu principal. Não é possível voltar mais.', true);
+    falar(t('fala_ja_inicio'), true);
   }
 }
 
@@ -712,12 +724,12 @@ function finalizarPedidoAcessivel() {
 
   modoAcessivel = false;
   mostrarTela('loading');
-  falar('Processando seu pedido, aguarde um momento...', true);
+  falar(t('fala_processando'), true);
 
   setTimeout(() => {
     document.getElementById('overlay-acessivel').classList.add('hidden');
     mostrarTela('sucesso');
-    falar(`Pedido número ${num} realizado com sucesso! Aguarde ser chamado no balcão. Obrigado por usar o modo acessível.`, true);
+    falar(t('fala_sucesso', { num }), true);
   }, 2500);
 }
 

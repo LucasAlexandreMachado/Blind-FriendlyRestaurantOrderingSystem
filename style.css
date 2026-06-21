@@ -162,6 +162,44 @@ html, body {
 
 .btn-icon { font-size: 20px; }
 
+.topbar-right {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.btn-idioma {
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.3);
+  color: var(--text);
+  font-size: 15px; font-weight: 800;
+  padding: 8px 16px; border-radius: 8px;
+  cursor: pointer; letter-spacing: 1px;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.btn-idioma:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.btn-idioma-welcome {
+  position: absolute; top: 24px; right: 32px;
+  z-index: 2;
+}
+
+.btn-idioma-ac {
+  background: #000;
+  border-color: var(--ac-accent);
+  color: var(--ac-accent);
+  font-size: 14px;
+}
+.btn-idioma-ac:hover {
+  background: var(--ac-accent);
+  color: #000;
+}
+
+.acessivel-header-actions {
+  display: flex; align-items: center; gap: 12px;
+}
+
 /* ═══════════════════════════════════════════════
    TOPBAR
 ═══════════════════════════════════════════════ */

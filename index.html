@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1920, initial-scale=1.0" />
-  <title>Totem Autoatendimento — Sabor & Arte</title>
+  <title>Totem Autoatendimento — Sabor &amp; Arte</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -15,23 +15,24 @@
   <div class="welcome-bg">
     <div class="welcome-overlay"></div>
   </div>
+  <button class="btn-idioma btn-idioma-welcome" onclick="alternarIdioma()" title="Switch to English">EN</button>
   <div class="welcome-content">
     <div class="logo-area">
       <div class="logo-icon">🍽️</div>
       <h1 class="logo-nome">Sabor <span>&amp;</span> Arte</h1>
-      <p class="logo-slogan">Experiência gastronômica do seu jeito</p>
+      <p class="logo-slogan" data-i18n="slogan">Experiência gastronômica do seu jeito</p>
     </div>
     <div class="welcome-actions">
       <button class="btn-primary btn-giant" id="btn-iniciar" onclick="iniciarPedido()">
         <span class="btn-icon">▶</span>
-        Iniciar Pedido
+        <span data-i18n="btn_iniciar">Iniciar Pedido</span>
       </button>
       <button class="btn-acessivel" id="btn-modo-acessivel" onclick="ativarModoAcessivel()">
         <span class="braille-icon">⠿</span>
-        Modo Acessível
+        <span data-i18n="btn_acessivel">Modo Acessível</span>
       </button>
     </div>
-    <p class="welcome-hint">Toque na tela para começar</p>
+    <p class="welcome-hint" data-i18n="welcome_hint">Toque na tela para começar</p>
   </div>
 </div>
 
@@ -40,11 +41,14 @@
 ═══════════════════════════════════════════════ -->
 <div id="tela-categorias" class="tela">
   <header class="topbar">
-    <button class="btn-voltar" onclick="voltarParaWelcome()">← Início</button>
-    <div class="topbar-title">Cardápio</div>
-    <button class="btn-carrinho" onclick="irParaCarrinho()">
-      🛒 <span id="contador-carrinho">0</span>
-    </button>
+    <button class="btn-voltar" onclick="voltarParaWelcome()" data-i18n="nav_inicio">← Início</button>
+    <div class="topbar-title" data-i18n="topbar_cardapio">Cardápio</div>
+    <div class="topbar-right">
+      <button class="btn-idioma" onclick="alternarIdioma()" title="Switch to English">EN</button>
+      <button class="btn-carrinho" onclick="irParaCarrinho()">
+        🛒 <span id="contador-carrinho">0</span>
+      </button>
+    </div>
   </header>
   <main class="categorias-grid" id="categorias-grid"></main>
 </div>
@@ -54,11 +58,14 @@
 ═══════════════════════════════════════════════ -->
 <div id="tela-produtos" class="tela">
   <header class="topbar">
-    <button class="btn-voltar" onclick="irParaCategorias()">← Voltar</button>
+    <button class="btn-voltar" onclick="irParaCategorias()" data-i18n="nav_voltar">← Voltar</button>
     <div class="topbar-title" id="titulo-categoria"></div>
-    <button class="btn-carrinho" onclick="irParaCarrinho()">
-      🛒 <span id="contador-carrinho-2">0</span>
-    </button>
+    <div class="topbar-right">
+      <button class="btn-idioma" onclick="alternarIdioma()" title="Switch to English">EN</button>
+      <button class="btn-carrinho" onclick="irParaCarrinho()">
+        🛒 <span id="contador-carrinho-2">0</span>
+      </button>
+    </div>
   </header>
   <main class="produtos-grid" id="produtos-grid"></main>
 </div>
@@ -68,27 +75,27 @@
 ═══════════════════════════════════════════════ -->
 <div id="tela-carrinho" class="tela">
   <header class="topbar">
-    <button class="btn-voltar" onclick="irParaCategorias()">← Cardápio</button>
-    <div class="topbar-title">Seu Pedido</div>
-    <div class="topbar-spacer"></div>
+    <button class="btn-voltar" onclick="irParaCategorias()" data-i18n="nav_cardapio">← Cardápio</button>
+    <div class="topbar-title" data-i18n="topbar_pedido">Seu Pedido</div>
+    <button class="btn-idioma" onclick="alternarIdioma()" title="Switch to English">EN</button>
   </header>
   <main class="carrinho-layout">
     <div class="carrinho-lista" id="carrinho-lista"></div>
     <div class="carrinho-resumo">
       <div class="resumo-card">
-        <h2>Resumo do Pedido</h2>
+        <h2 data-i18n="resumo_titulo">Resumo do Pedido</h2>
         <div class="resumo-linha">
-          <span>Subtotal</span>
+          <span data-i18n="resumo_subtotal">Subtotal</span>
           <span id="resumo-subtotal">R$ 0,00</span>
         </div>
         <div class="resumo-linha resumo-total">
-          <span>Total</span>
+          <span data-i18n="resumo_total">Total</span>
           <span id="resumo-total">R$ 0,00</span>
         </div>
-        <button class="btn-primary btn-finalizar" onclick="irParaConfirmacao()">
+        <button class="btn-primary btn-finalizar" onclick="irParaConfirmacao()" data-i18n="btn_finalizar">
           ✔ Finalizar Pedido
         </button>
-        <button class="btn-secondary" onclick="irParaCategorias()">
+        <button class="btn-secondary" onclick="irParaCategorias()" data-i18n="btn_add_mais">
           + Adicionar Mais Itens
         </button>
       </div>
@@ -101,21 +108,21 @@
 ═══════════════════════════════════════════════ -->
 <div id="tela-confirmacao" class="tela">
   <header class="topbar">
-    <button class="btn-voltar" onclick="irParaCarrinho()">← Carrinho</button>
-    <div class="topbar-title">Confirmar Pedido</div>
-    <div class="topbar-spacer"></div>
+    <button class="btn-voltar" onclick="irParaCarrinho()" data-i18n="nav_carrinho_btn">← Carrinho</button>
+    <div class="topbar-title" data-i18n="topbar_confirmar">Confirmar Pedido</div>
+    <button class="btn-idioma" onclick="alternarIdioma()" title="Switch to English">EN</button>
   </header>
   <main class="confirmacao-layout">
     <div class="confirmacao-card">
-      <h2>Revise seu pedido antes de finalizar</h2>
+      <h2 data-i18n="confirm_revisar">Revise seu pedido antes de finalizar</h2>
       <div id="confirmacao-lista"></div>
       <div class="confirmacao-total">
-        <span>Total a pagar:</span>
+        <span data-i18n="confirm_total">Total a pagar:</span>
         <strong id="confirmacao-total-val">R$ 0,00</strong>
       </div>
       <div class="confirmacao-acoes">
-        <button class="btn-secondary" onclick="irParaCarrinho()">Editar Pedido</button>
-        <button class="btn-primary btn-confirmar" onclick="finalizarPedido()">✔ Confirmar e Pagar</button>
+        <button class="btn-secondary" onclick="irParaCarrinho()" data-i18n="btn_editar">Editar Pedido</button>
+        <button class="btn-primary btn-confirmar" onclick="finalizarPedido()" data-i18n="btn_confirmar_pagar">✔ Confirmar e Pagar</button>
       </div>
     </div>
   </main>
@@ -127,8 +134,8 @@
 <div id="tela-loading" class="tela">
   <div class="loading-content">
     <div class="spinner"></div>
-    <h1>Processando seu pedido...</h1>
-    <p>Por favor, aguarde um momento.</p>
+    <h1 data-i18n="loading_titulo">Processando seu pedido...</h1>
+    <p data-i18n="loading_subtitulo">Por favor, aguarde um momento.</p>
   </div>
 </div>
 
@@ -138,10 +145,10 @@
 <div id="tela-sucesso" class="tela">
   <div class="sucesso-content">
     <div class="sucesso-icon">✔</div>
-    <h1>Pedido Realizado!</h1>
-    <div class="sucesso-numero">Número: <strong id="numero-pedido">#001</strong></div>
-    <p>Aguarde ser chamado no balcão.</p>
-    <button class="btn-primary btn-giant" onclick="novoAtendimento()">
+    <h1 data-i18n="sucesso_titulo">Pedido Realizado!</h1>
+    <div class="sucesso-numero"><span data-i18n="sucesso_numero">Número:</span> <strong id="numero-pedido">#001</strong></div>
+    <p data-i18n="sucesso_aguarde">Aguarde ser chamado no balcão.</p>
+    <button class="btn-primary btn-giant" onclick="novoAtendimento()" data-i18n="btn_novo">
       Novo Atendimento
     </button>
   </div>
@@ -152,8 +159,11 @@
 ═══════════════════════════════════════════════ -->
 <div id="overlay-acessivel" class="overlay-acessivel hidden">
   <div class="acessivel-header">
-    <div class="acessivel-badge">⠿ MODO ACESSÍVEL ATIVO</div>
-    <button class="btn-sair-acessivel" onclick="sairModoAcessivel()">✕ Sair</button>
+    <div class="acessivel-badge" data-i18n="ac_badge">⠿ MODO ACESSÍVEL ATIVO</div>
+    <div class="acessivel-header-actions">
+      <button class="btn-idioma btn-idioma-ac" onclick="alternarIdioma()" title="Switch to English">EN</button>
+      <button class="btn-sair-acessivel" onclick="sairModoAcessivel()" data-i18n="ac_btn_sair">✕ Sair</button>
+    </div>
   </div>
 
   <div class="acessivel-tela" id="acessivel-tela">
@@ -166,9 +176,9 @@
 
   <div class="acessivel-controles">
     <div class="controle-instrucoes">
-      <div class="instrucao"><kbd>Clique curto</kbd> Próxima opção</div>
-      <div class="instrucao"><kbd>Clique longo</kbd> Selecionar</div>
-      <div class="instrucao"><kbd>Duplo clique</kbd> Voltar</div>
+      <div class="instrucao"><kbd data-i18n="ac_kbd_curto">Clique curto</kbd> <span data-i18n="ac_instrucao_curto">Próxima opção</span></div>
+      <div class="instrucao"><kbd data-i18n="ac_kbd_longo">Clique longo</kbd> <span data-i18n="ac_instrucao_longo">Selecionar</span></div>
+      <div class="instrucao"><kbd data-i18n="ac_kbd_duplo">Duplo clique</kbd> <span data-i18n="ac_instrucao_duplo">Voltar</span></div>
     </div>
     <button
       id="btn-navegacao"
@@ -182,7 +192,7 @@
   </div>
 
   <div class="acessivel-carrinho-info" id="acessivel-carrinho-info">
-    🛒 <span id="acessivel-qtd">0</span> itens — Total: <span id="acessivel-total">R$ 0,00</span>
+    🛒 <span id="acessivel-qtd">0</span> <span data-i18n="ac_itens">itens</span> — <span data-i18n="ac_total_label">Total:</span> <span id="acessivel-total">R$ 0,00</span>
   </div>
 </div>
 
@@ -196,17 +206,17 @@
     <h2 id="modal-produto-nome">Nome</h2>
     <p id="modal-produto-descricao">Descrição</p>
     <div class="modal-produto-preco" id="modal-produto-preco">R$ 0,00</div>
-    
+
     <div class="modal-controles-container">
-      <span class="modal-label">Quantidade no carrinho:</span>
+      <span class="modal-label" data-i18n="modal_qtd_label">Quantidade no carrinho:</span>
       <div class="modal-controles">
         <button class="btn-menos" onclick="alterarQtdModal(-1)">−</button>
         <span class="produto-qtd-label" id="modal-produto-qtd">0</span>
         <button class="btn-mais" onclick="alterarQtdModal(1)">+</button>
       </div>
     </div>
-    
-    <button class="btn-primary btn-modal-acao" onclick="confirmarModalProduto()">✔ Concluir</button>
+
+    <button class="btn-primary btn-modal-acao" onclick="confirmarModalProduto()" data-i18n="btn_concluir">✔ Concluir</button>
   </div>
 </div>
 
@@ -215,6 +225,7 @@
 ═══════════════════════════════════════════════ -->
 <div id="toast" class="toast hidden"></div>
 
+<script src="i18n.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
