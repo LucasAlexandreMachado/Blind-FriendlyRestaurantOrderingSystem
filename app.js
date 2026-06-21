@@ -699,12 +699,13 @@ function finalizarPedidoAcessivel() {
   document.getElementById('numero-pedido').textContent = `#${num}`;
   carrinho = [];
   atualizarContadores();
-  
-  sairModoAcessivel();
+
+  modoAcessivel = false;
   mostrarTela('loading');
   falar('Processando seu pedido, aguarde um momento...', true);
 
   setTimeout(() => {
+    document.getElementById('overlay-acessivel').classList.add('hidden');
     mostrarTela('sucesso');
     falar(`Pedido número ${num} realizado com sucesso! Aguarde ser chamado no balcão. Obrigado por usar o modo acessível.`, true);
   }, 2500);
@@ -767,6 +768,21 @@ function liberarPressao(e) {
     }, DUPLO_MS);
   }
 }
+
+/* ════════════════════════════════════════════════════════
+   BARRA DE ESPAÇO — ESPELHA O BOTÃO ÚNICO
+════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space' || !modoAcessivel || e.repeat) return;
+  e.preventDefault();
+  iniciarPressao(null);
+});
+
+document.addEventListener('keyup', e => {
+  if (e.code !== 'Space') return;
+  e.preventDefault();
+  if (modoAcessivel) liberarPressao(null);
+});
 
 /* ════════════════════════════════════════════════════════
    UTILITÁRIOS
