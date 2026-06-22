@@ -111,6 +111,10 @@ const TRADUCOES = {
     fala_continuar_desc: 'Clique longo para voltar ao cardápio.',
     fala_item_desc:      'Subtotal: {sub}. Clique longo para remover uma unidade deste item.',
     fala_volta_cat_ir:   'Voltando ao cardápio. Navegue pelas categorias.',
+    fala_preco_real:     '{inteiro} real',
+    fala_preco_reais:    '{inteiro} reais',
+    fala_preco_centavo:  ' e {centavos} centavo',
+    fala_preco_centavos: ' e {centavos} centavos',
 
     /* ── Status acessível ── */
     ac_status_menu:      'Menu Principal',
@@ -240,6 +244,10 @@ const TRADUCOES = {
     fala_continuar_desc: 'Long press to return to the menu.',
     fala_item_desc:      'Subtotal: {sub}. Long press to remove one unit of this item.',
     fala_volta_cat_ir:   'Back to menu. Navigate through categories.',
+    fala_preco_real:     '{inteiro} real',
+    fala_preco_reais:    '{inteiro} reais',
+    fala_preco_centavo:  ' and {centavos} cent',
+    fala_preco_centavos: ' and {centavos} cents',
 
     /* ── Status acessível ── */
     ac_status_menu:      'Main Menu',
