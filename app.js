@@ -795,7 +795,16 @@ function liberarPressao(e) {
    BARRA DE ESPAÇO — ESPELHA O BOTÃO ÚNICO
 ════════════════════════════════════════════════════════ */
 document.addEventListener('keydown', e => {
-  if (e.code !== 'Space' || !modoAcessivel || e.repeat) return;
+  if (e.code !== 'Space' || e.repeat) return;
+
+  if (!modoAcessivel) {
+    if (telaAtual === 'welcome') {
+      e.preventDefault();
+      ativarModoAcessivel();
+    }
+    return;
+  }
+
   e.preventDefault();
   iniciarPressao(null);
 });
