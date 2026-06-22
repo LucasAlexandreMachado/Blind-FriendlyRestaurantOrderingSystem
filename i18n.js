@@ -74,7 +74,7 @@ const TRADUCOES = {
     toast_max_estoque:'Quantidade máxima atingida',
 
     /* ── Fala — modo acessível ── */
-    fala_bemvindo:    'Bem-vindo ao modo acessível. Você está no Menu Principal. Primeira opção: Ver Cardápio. Clique longo para selecionar o Cardápio, clique curto para ir para o Carrinho, clique duplo para voltar.',
+    fala_bemvindo:    'Bem-vindo ao Sabor e Arte, seu totem de autoatendimento acessível. Para navegar, use o botão do totem ou a tecla espaço. Clique curto avança a opção, clique longo seleciona, e clique duplo volta. Você está no Menu Principal. Primeira opção: Ver Cardápio. Clique longo para selecionar o Cardápio, clique curto para ir para o Carrinho.',
     fala_menu_cardapio:  'Opção: Ver Cardápio. Clique longo para selecionar o Cardápio, clique curto para ir para o Carrinho, clique duplo para voltar.',
     fala_menu_carrinho:  'Opção: Ver Carrinho e Finalizar. Você tem {qtd} itens. Total: {total}. Clique longo para entrar no Carrinho, clique curto para ir para o Cardápio, clique duplo para voltar.',
     fala_cat:            'Categoria: {nome}. {qtd} itens. Clique longo para entrar na categoria, clique curto para mostrar a próxima, clique duplo para voltar ao menu principal.',
@@ -203,7 +203,7 @@ const TRADUCOES = {
     toast_max_estoque:'Maximum quantity reached',
 
     /* ── Fala — modo acessível ── */
-    fala_bemvindo:    'Welcome to accessible mode. You are in the Main Menu. First option: View Menu. Long press to select Menu, short press to go to Cart, double press to go back.',
+    fala_bemvindo:    'Welcome to Sabor e Arte, your accessible self-service kiosk. To navigate, use the totem button or the spacebar. Short press advances to the next option, long press selects, and double press goes back. You are in the Main Menu. First option: View Menu. Long press to select Menu, short press to go to Cart.',
     fala_menu_cardapio:  'Option: View Menu. Long press to select Menu, short press to go to Cart, double press to go back.',
     fala_menu_carrinho:  'Option: View Cart and Checkout. You have {qtd} items. Total: {total}. Long press to enter Cart, short press to go to Menu, double press to go back.',
     fala_cat:            'Category: {nome}. {qtd} items. Long press to enter category, short press to show next, double press to return to main menu.',
