@@ -365,21 +365,34 @@ function falar(texto, urgente = false) {
   if (!window.speechSynthesis) return;
   if (urgente) window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(texto);
-  utter.lang = t('lang_tts');
+  const langAlvo = t('lang_tts');
+  utter.lang = langAlvo;
   utter.rate = 0.95;
   utter.pitch = 1.0;
   utter.volume = 1.0;
 
   const vozes = speechSynthesis.getVoices();
-  const langPrefix = idiomaAtual === 'en-US' ? 'en' : 'pt';
-  const voz = vozes.find(v => v.lang.startsWith(langPrefix)) || null;
+  // Busca voz exata primeiro (ex: 'en-US' ou 'pt-BR')
+  let voz = vozes.find(v => v.lang.replace('_', '-').toLowerCase() === langAlvo.toLowerCase());
+  
+  // Se não achar, busca pelo prefixo base (ex: 'en' ou 'pt')
+  if (!voz) {
+    const langBase = langAlvo.split('-')[0].toLowerCase();
+    voz = vozes.find(v => v.lang.toLowerCase().startsWith(langBase));
+  }
+
   if (voz) utter.voice = voz;
 
   window.speechSynthesis.speak(utter);
 }
 
 // Vozes podem carregar assíncronamente
-speechSynthesis.onvoiceschanged = () => { /* pronto */ };
+if (window.speechSynthesis) {
+  speechSynthesis.onvoiceschanged = () => {
+    speechSynthesis.getVoices();
+  };
+  speechSynthesis.getVoices();
+}
 
 /* ════════════════════════════════════════════════════════
    MODO ACESSÍVEL — ATIVAÇÃO / DESATIVAÇÃO
@@ -823,11 +836,16 @@ function formatarPreco(valor) {
 }
 
 function falarPreco(valor) {
-  // Formata para fala natural: "15,00" → "quinze reais"
-  // Usa o locale pt-BR com palavras
+  // Formata para fala natural: "15,00" → "quinze reais" (com suporte a i18n)
   const inteiro = Math.floor(valor);
   const centavos = Math.round((valor - inteiro) * 100);
-  let texto = `${inteiro} reais`;
-  if (centavos > 0) texto += ` e ${centavos} centavos`;
+  
+  const keyReais = inteiro === 1 ? 'fala_preco_real' : 'fala_preco_reais';
+  let texto = t(keyReais, { inteiro });
+  
+  if (centavos > 0) {
+    const keyCentavos = centavos === 1 ? 'fala_preco_centavo' : 'fala_preco_centavos';
+    texto += t(keyCentavos, { centavos });
+  }
   return texto;
 }

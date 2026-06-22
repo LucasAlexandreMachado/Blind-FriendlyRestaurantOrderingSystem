@@ -74,11 +74,11 @@ const TRADUCOES = {
     toast_max_estoque:'Quantidade máxima atingida',
 
     /* ── Fala — modo acessível ── */
-    fala_bemvindo:    'Bem-vindo ao modo acessível. Você está no Menu Principal. Primeira opção: Ver Cardápio. Clique longo para selecionar o Cardápio, clique curto para ir para o Carrinho, clique duplo para voltar.',
+    fala_bemvindo:    'Bem-vindo ao Sabor e Arte, seu totem de autoatendimento acessível. Para navegar, use o botão do totem ou a tecla espaço. Clique curto avança a opção, clique longo seleciona, e clique duplo volta. Você está no Menu Principal. Primeira opção: Ver Cardápio. Clique longo para selecionar o Cardápio, clique curto para ir para o Carrinho.',
     fala_menu_cardapio:  'Opção: Ver Cardápio. Clique longo para selecionar o Cardápio, clique curto para ir para o Carrinho, clique duplo para voltar.',
     fala_menu_carrinho:  'Opção: Ver Carrinho e Finalizar. Você tem {qtd} itens. Total: {total}. Clique longo para entrar no Carrinho, clique curto para ir para o Cardápio, clique duplo para voltar.',
     fala_cat:            'Categoria: {nome}. {qtd} itens. Clique longo para entrar na categoria, clique curto para mostrar a próxima, clique duplo para voltar ao menu principal.',
-    fala_prod:           '{nome}. {desc}. Valor {preco}. Clique longo para ver opções, clique curto para mostrar o próximo, clique duplo para voltar ao cardápio.',
+    fala_prod:           '{nome}. {desc}. Valor {preco}. Clique longo para selecionar o produto, clique curto para mostrar o próximo, clique duplo para voltar ao cardápio.',
     fala_op_adicionar:   'Adicionar uma unidade.',
     fala_op_remover:     'Remover uma unidade.',
     fala_op_concluir:    'Concluir e fechar.',
@@ -88,8 +88,8 @@ const TRADUCOES = {
     fala_opcao_nav:      'Opção: {label}. {desc}',
     fala_cardapio_aberto:'Cardápio aberto. Primeira categoria: {nome}. {qtd} itens. Clique longo para entrar na categoria, clique curto para mostrar a próxima, clique duplo para voltar ao menu principal.',
     fala_entrou_carrinho:'Você entrou no carrinho com {qtd} itens. Valor total: {total}. Dê um clique curto para navegar e remover itens. Primeira opção: {label}. {desc}',
-    fala_cat_selecionada:'Categoria {nome} selecionada. Primeiro item: {prod}. Valor {preco}. Clique longo para ver opções, clique curto para mostrar o próximo, clique duplo para voltar ao cardápio.',
-    fala_prod_selecionado:'Você adicionou {qtd} {nome} ao carrinho. Valor {preco}. Aperte longo para adicionar mais, clique curto para avançar, clique duplo para cancelar e sair.',
+    fala_cat_selecionada:'Categoria {nome} selecionada. Primeiro item: {prod}. Valor {preco}. Clique longo para selecionar o produto, clique curto para mostrar o próximo, clique duplo para voltar ao cardápio.',
+    fala_prod_selecionado:'Produto {nome} aberto. Valor {preco}. A quantidade inicial é {qtd}. Atenção: é preciso confirmar para adicionar ao carrinho. Clique curto para navegar entre adicionar, remover ou concluir. Clique longo para selecionar a opção. Clique duplo para cancelar e sair.',
     fala_max_estoque:    'Não há mais produtos para adicionar daquele produto específico.',
     fala_unidade_add:    'Unidade adicionada. Quantidade atual: {qtd}.',
     fala_unidade_rem:    'Unidade removida. Quantidade atual: {qtd}.',
@@ -111,6 +111,10 @@ const TRADUCOES = {
     fala_continuar_desc: 'Clique longo para voltar ao cardápio.',
     fala_item_desc:      'Subtotal: {sub}. Clique longo para remover uma unidade deste item.',
     fala_volta_cat_ir:   'Voltando ao cardápio. Navegue pelas categorias.',
+    fala_preco_real:     '{inteiro} real',
+    fala_preco_reais:    '{inteiro} reais',
+    fala_preco_centavo:  ' e {centavos} centavo',
+    fala_preco_centavos: ' e {centavos} centavos',
 
     /* ── Status acessível ── */
     ac_status_menu:      'Menu Principal',
@@ -203,11 +207,11 @@ const TRADUCOES = {
     toast_max_estoque:'Maximum quantity reached',
 
     /* ── Fala — modo acessível ── */
-    fala_bemvindo:    'Welcome to accessible mode. You are in the Main Menu. First option: View Menu. Long press to select Menu, short press to go to Cart, double press to go back.',
+    fala_bemvindo:    'Welcome to Sabor e Arte, your accessible self-service kiosk. To navigate, use the totem button or the spacebar. Short press advances to the next option, long press selects, and double press goes back. You are in the Main Menu. First option: View Menu. Long press to select Menu, short press to go to Cart.',
     fala_menu_cardapio:  'Option: View Menu. Long press to select Menu, short press to go to Cart, double press to go back.',
     fala_menu_carrinho:  'Option: View Cart and Checkout. You have {qtd} items. Total: {total}. Long press to enter Cart, short press to go to Menu, double press to go back.',
     fala_cat:            'Category: {nome}. {qtd} items. Long press to enter category, short press to show next, double press to return to main menu.',
-    fala_prod:           '{nome}. {desc}. Price {preco}. Long press for options, short press to show next, double press to return to menu.',
+    fala_prod:           '{nome}. {desc}. Price {preco}. Long press to select the product, short press to show next, double press to return to menu.',
     fala_op_adicionar:   'Add one unit.',
     fala_op_remover:     'Remove one unit.',
     fala_op_concluir:    'Done and close.',
@@ -217,8 +221,8 @@ const TRADUCOES = {
     fala_opcao_nav:      'Option: {label}. {desc}',
     fala_cardapio_aberto:'Menu opened. First category: {nome}. {qtd} items. Long press to enter category, short press to show next, double press to return to main menu.',
     fala_entrou_carrinho:'You entered the cart with {qtd} items. Total: {total}. Short press to navigate and remove items. First option: {label}. {desc}',
-    fala_cat_selecionada:'Category {nome} selected. First item: {prod}. Price {preco}. Long press for options, short press to show next, double press to return to menu.',
-    fala_prod_selecionado:'You added {qtd} {nome} to the cart. Price {preco}. Long press to add more, short press to advance, double press to cancel and exit.',
+    fala_cat_selecionada:'Category {nome} selected. First item: {prod}. Price {preco}. Long press to select the product, short press to show next, double press to return to menu.',
+    fala_prod_selecionado:'Product {nome} opened. Price {preco}. Initial quantity is {qtd}. Attention: you must confirm to add to the cart. Short press to navigate between add, remove or done. Long press to select the option. Double press to cancel and exit.',
     fala_max_estoque:    'No more units available for that product.',
     fala_unidade_add:    'Unit added. Current quantity: {qtd}.',
     fala_unidade_rem:    'Unit removed. Current quantity: {qtd}.',
@@ -240,6 +244,10 @@ const TRADUCOES = {
     fala_continuar_desc: 'Long press to return to the menu.',
     fala_item_desc:      'Subtotal: {sub}. Long press to remove one unit of this item.',
     fala_volta_cat_ir:   'Back to menu. Navigate through categories.',
+    fala_preco_real:     '{inteiro} real',
+    fala_preco_reais:    '{inteiro} reais',
+    fala_preco_centavo:  ' and {centavos} cent',
+    fala_preco_centavos: ' and {centavos} cents',
 
     /* ── Status acessível ── */
     ac_status_menu:      'Main Menu',
