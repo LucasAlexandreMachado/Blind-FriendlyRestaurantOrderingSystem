@@ -265,7 +265,14 @@ const TRADUCOES = {
   },
 };
 
-let idiomaAtual = 'pt-BR';
+function getIdiomaInicial() {
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    return navigator.language.startsWith('en') ? 'en-US' : 'pt-BR';
+  }
+  return 'pt-BR';
+}
+
+let idiomaAtual = getIdiomaInicial();
 
 function t(chave, vars = {}) {
   const dic = TRADUCOES[idiomaAtual] || TRADUCOES['pt-BR'];

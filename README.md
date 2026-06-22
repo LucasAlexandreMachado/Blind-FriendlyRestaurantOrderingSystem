@@ -1,118 +1,132 @@
-# 🍽️ Totem de Autoatendimento Acessível para Restaurante
+[🇧🇷 Leia em Português](README.pt-br.md)
 
-## 📋 Descrição
+# 🍽️ Accessible Self-Service Kiosk for Restaurants
 
-Protótipo web de um totem de autoatendimento para restaurantes com foco em **acessibilidade para pessoas com deficiência visual**. Desenvolvido como projeto acadêmico de Interação Humano-Computador (IHC).
+## 📋 Description
 
-O sistema implementa conceitos de design inclusivo, navegação multimodal e usabilidade centrada no usuário.
+Web prototype of a self-service kiosk for restaurants with a focus on **accessibility for visually impaired people**. Developed as an academic project for the Human-Computer Interaction (HCI) course.
 
-## 🌐 Demonstração Online
+The system implements concepts of inclusive design, multimodal navigation, and user-centered usability.
 
-Acesse o protótipo rodando diretamente no navegador através do GitHub Pages:
-[**Testar Totem de Autoatendimento**](https://lucasalexandremachado.github.io/Blind-FriendlyRestaurantOrderingSystem/)
+## 🌐 Online Demonstration
 
-## 🎯 Características Principais
+Access the prototype running directly in your browser via GitHub Pages:
+[**Test Self-Service Kiosk**](https://lucasalexandremachado.github.io/Blind-FriendlyRestaurantOrderingSystem/)
 
-### Modo Normal
-- Interface visual intuitiva com botões grandes
-- Navegação por cliques simples
-- Carrinho flutuante para fácil acesso
-- Design inspirado em totens de fast-food
-- Feedback visual em todas as ações
+## 🎯 Main Features
 
-### Modo Acessível
-- **Alto contraste**: Fundo preto com texto amarelo e branco
-- **Text-to-Speech**: Saída de áudio para todas as ações
-- **Navegação por botão único** com três ações:
-  - **Clique curto**: Avança para próxima opção
-  - **Clique longo**: Seleciona opção atual
-  - **Duplo clique**: Volta para tela anterior
-- **Indicador visual e sonoro**: Mostra estado atual constantemente
-- **Navegação sem mouse**: Completamente baseada em botão único
-- **Compatibilidade com leitores de tela**
+### Normal Mode
+- Intuitive visual interface with large buttons
+- Simple click navigation
+- Floating cart for easy access
+- Design inspired by fast-food kiosks
+- Visual feedback on all actions
 
-## 🚀 Como Usar
+### Accessible Mode
+- **High contrast**: Black background with yellow and white text
+- **Text-to-Speech**: Audio output for all actions
+- **Single-button navigation** with three actions:
+  - **Short press**: Advances to the next option
+  - **Long press**: Selects the current option
+  - **Double press**: Returns to the previous screen
+- **Visual and sound indicator**: Constantly shows the current state
+- **Mouseless navigation**: Completely based on a single button
+- **Screen reader compatibility**
 
-### 1. Requisitos
-- Navegador moderno com suporte a:
+## 🚀 How to Use
+
+### 1. Requirements
+- Modern browser with support for:
   - HTML5
   - CSS3
   - JavaScript ES6+
   - Web Speech API
 
-### 2. Arquivos do Projeto
+### 2. Project Files
 ```
 .
-├── index.html        # Estrutura HTML
-├── styles.css        # Estilos CSS
-├── app.js           # Lógica JavaScript
-├── produtos.json    # Base de dados de produtos
-└── README.md        # Este arquivo
+├── index.html        # HTML Structure
+├── styles.css        # CSS Styles
+├── app.js           # JavaScript Logic
+├── cardapio.json    # Products Database
+└── README.md        # This file
 ```
 
-### 3. Executar o Projeto
+### 3. Run the Project
 
-#### Opção 1: Abrir diretamente
-1. Navegue até a pasta do projeto
-2. Abra `index.html` no navegador
+#### Option 1: Open directly
+1. Navigate to the project folder
+2. Open `index.html` in the browser
 
-#### Opção 2: Usar servidor local (recomendado)
+#### Option 2: Use a local server (recommended)
 ```bash
-# Com Python 3
+# With Python 3
 python -m http.server 8000
 
-# Com Python 2
+# With Python 2
 python -m SimpleHTTPServer 8000
 
-# Com Live Server (VS Code)
-# Instale extensão "Live Server" e clique em "Go Live"
+# With Live Server (VS Code)
+# Install the "Live Server" extension and click "Go Live"
 ```
 
-Depois acesse: `http://localhost:8000`
+Then access: `http://localhost:8000`
 
-## 💻 Teknologias Utilizadas
+## 💻 Technologies Used
 
-- **HTML5**: Estrutura semântica
-- **CSS3**: Estilos e animações
-- **JavaScript Vanilla**: Lógica sem frameworks
-- **Web Speech API**: Text-to-Speech (fala)
-- **JSON**: Dados de produtos
+- **HTML5**: Semantic structure
+- **CSS3**: Styles and animations
+- **Vanilla JavaScript**: Logic without frameworks
+- **Web Speech API**: Text-to-Speech
+- **JSON**: Product data
 
-## 📱 Fluxo de Uso
+## 📱 Usage Flow
 
-### Modo Normal
-1. Tela inicial com botões "Iniciar Pedido" e "Modo Acessível"
-2. Selecionar categoria de produtos
-3. Escolher produtos desejados
-4. Visualizar carrinho
-5. Revisar pedido
-6. Finalizar pedido
+### Normal Mode
+1. Home screen with "Start Order" and "Accessible Mode" buttons
+2. Select a product category
+3. Choose desired products
+4. View cart
+5. Review order
+6. Place order
 
-### Modo Acessível
-1. Clicar em "Modo Acessível"
-2. Sistema entra em modo de alto contraste
-3. Botão único aparece no canto inferior direito
-4. Navegar com:
-   - **Clique curto**: Próxima opção (o sistema fala)
-   - **Clique longo**: Selecionar (com feedback sonoro)
-   - **Duplo clique**: Voltar (com som de retorno)
-5. Fluxo igual ao modo normal, mas com áudio contínuo
+### Accessible Mode
+1. Click on "Accessible Mode" (or press the **Space** key on the home screen)
+2. System enters high contrast mode
+3. Single button appears in the bottom right corner
+4. Navigate using:
+   - **Short press**: Next option (the system speaks)
+   - **Long press**: Select (with sound feedback)
+   - **Double press**: Go back (with return sound)
 
-## 🎨 Customização
+**🗺️ System Navigation Map:**
+- 🏠 **Main Menu**
+  - 📖 **View Menu**
+    - 📂 *Categories (e.g.: Burgers, Drinks...)*
+      - 🍔 *Products (e.g.: Cheeseburger, Water...)*
+        - ➕ Add +1
+        - ➖ Remove -1
+        - ✔️ Done (Confirms quantity and returns to list)
+  - 🛒 **View Cart and Checkout**
+    - 📝 *Cart Items (Long press removes 1 unit)*
+    - ✔️ Place Order ➡️ *(Advances to Confirmation and finalizes)*
+    - 🔄 Continue Shopping ➡️ *(Returns to Menu)*
 
-### Adicionar Produtos
-Edite `produtos.json`:
+## 🎨 Customization
+
+### Add Products
+Edit `cardapio.json`:
 
 ```json
 {
   "categorias": [
     {
-      "nome": "Sua Categoria",
+      "nome": "Your Category",
       "icone": "🍕",
       "itens": [
         {
-          "nome": "Seu Produto",
-          "descricao": "Descrição do produto",
+          "nome": "Your Product",
+          "descricao": "Product description",
           "preco": 25.00
         }
       ]
@@ -121,134 +135,133 @@ Edite `produtos.json`:
 }
 ```
 
-### Modificar Cores
-Em `styles.css`, edite as variáveis CSS:
+### Modify Colors
+In `styles.css`, edit the CSS variables:
 
 ```css
 :root {
-    --cor-primaria: #FF6B35;      /* Laranja */
-    --cor-secundaria: #004E89;    /* Azul */
-    --cor-fundo: #F7F7F7;         /* Cinza claro */
-    --cor-texto: #333;            /* Preto */
-    --cor-destaque: #FFD700;      /* Amarelo ouro */
+    --cor-primaria: #FF6B35;      /* Orange */
+    --cor-secundaria: #004E89;    /* Blue */
+    --cor-fundo: #F7F7F7;         /* Light gray */
+    --cor-texto: #333;            /* Black */
+    --cor-destaque: #FFD700;      /* Gold yellow */
 }
 ```
 
-### Ajustar Idioma de Áudio
-Em `app.js`, modificar `utteranceConfig`:
+### Adjust Audio Language
+In `app.js`, modify `utteranceConfig`:
 
 ```javascript
 const utteranceConfig = {
-    rate: 1,      // Velocidade (0.5 = lento, 2 = rápido)
-    pitch: 1,     // Tom (0.5 = grave, 2 = agudo)
-    volume: 1,    // Volume (0 = mudo, 1 = máximo)
-    lang: 'pt-BR' // Idioma
+    rate: 1,      // Speed (0.5 = slow, 2 = fast)
+    pitch: 1,     // Pitch (0.5 = low, 2 = high)
+    volume: 1,    // Volume (0 = muted, 1 = max)
+    lang: 'pt-BR' // Language
 };
 ```
 
-## ♿ Conceitos de Acessibilidade Implementados
+## ♿ Implemented Accessibility Concepts
 
-1. **Feedback Multissensorial**
-   - Visual: Mudanças de cor, animações
-   - Auditivo: Text-to-Speech em todas as ações
-   - Sensorial: Animações do indicador
+1. **Multisensory Feedback**
+   - Visual: Color changes, animations
+   - Auditory: Text-to-Speech for all actions
+   - Sensorial: Indicator animations
 
-2. **Visibilidade de Estado**
-   - Indicador visual mostra posição atual
-   - Áudio descreve estado continuamente
-   - Destaque visual da opção selecionada
+2. **System Status Visibility**
+   - Visual indicator shows current position
+   - Audio continuously describes the state
+   - Visual highlight of the selected option
 
-3. **Navegação Sem Mouse**
-   - Botão único com três ações
-   - Todas as funções acessíveis
-   - Sem necessidade de teclado
+3. **Mouseless Navigation**
+   - Single button with three actions
+   - All functions accessible
+   - No keyboard needed
 
-4. **Alto Contraste**
-   - Fundo preto, texto branco/amarelo
-   - Bordas reforçadas
-   - Fonte grande (até 56px)
+4. **High Contrast**
+   - Black background, white/yellow text
+   - Reinforced borders
+   - Large fonts (up to 56px)
 
-5. **Robustez e Precisão (Anti-Ghosting)**
-   - Uso de `Pointer Events` para unificar interações de mouse, toque e caneta sem duplicação.
-   - Algoritmo de *Debounce* (anti-rebote) para o botão de acessibilidade, filtrando tremores ou cliques duplos acidentais.
-   - Compatível com leitores de tela
-   - Sem plugins necessários
-   - Funciona offline (exceto Web Speech)
+5. **Robustness and Precision (Anti-Ghosting)**
+   - Use of `Pointer Events` to unify mouse, touch, and pen interactions without duplication.
+   - *Debounce* algorithm for the accessibility button, filtering tremors or accidental double clicks.
+   - Compatible with screen readers
+   - No plugins required
+   - Works offline (except Web Speech)
 
-## 🧪 Testes
+## 🧠 Applied HCI Guidelines and Heuristics
 
-### Testar Modo Normal
-1. Abra a aplicação
-2. Clique em "Iniciar Pedido"
-3. Navegue pelas categorias e produtos
-4. Adicione ao carrinho
-5. Finalize o pedido
+The project was designed respecting fundamental Human-Computer Interaction principles, aligned with **Nielsen's Heuristics**:
 
-### Testar Modo Acessível
-1. Abra a aplicação
-2. Clique em "Modo Acessível"
-3. Use botão único:
-   - Clique curto 3-4 vezes para navegar
-   - Clique longo para selecionar
-   - Duplo clique para voltar
-4. Verifique áudio em cada ação
+1. **Visibility of system status**: The user is constantly informed about the current state through Text-to-Speech audio and visual indicators (e.g.: "You are in the cart with 3 items").
+2. **User control and freedom**: Navigation offers clear exits at any time. The "double press" action ensures the user can always go back, cancel an action, and never feel trapped in a flow.
+3. **Consistency and standards**: The interaction logic of the accessible mode maintains the exact same behavior across all application screens (short = next, long = select, double = back).
+4. **Error prevention**: Logical blocks like "empty cart" or "maximum stock limit", coupled with *debounce* to filter accidental clicks on the single button.
+5. **Recognition rather than recall**: The system iteratively reads all available options on the screen, as well as reviews cart items, not requiring the user to memorize navigation.
+6. **Aesthetic and minimalist design**: The accessible mode eliminates visual noise, focusing on high contrast (black/yellow/white) and large fonts purely for readability and clarity for low vision users.
 
-### Testar Sem Som
-1. Ativar leitor de tela (NVDA/JAWS no Windows, VoiceOver no Mac)
-2. Navegar apenas por áudio
-3. Verificar descrições das opções
+## 🧪 Testing
 
-## 📊 Estrutura de Dados
+### Test Normal Mode
+1. Open the application
+2. Click "Start Order"
+3. Navigate through categories and products
+4. Add to cart
+5. Place order
 
-### Produto
+### Test Accessible Mode
+1. Open the application
+2. Click "Accessible Mode"
+3. Use the single button:
+   - Short press 3-4 times to navigate
+   - Long press to select
+   - Double press to go back
+4. Verify audio in each action
+
+### Test Without Sound
+1. Enable screen reader (NVDA/JAWS on Windows, VoiceOver on Mac)
+2. Navigate only by audio
+3. Verify option descriptions
+
+## 📊 Data Structure
+
+### Product
 ```javascript
 {
-  nome: String,           // Nome do produto
-  descricao: String,      // Descrição detalhada
-  preco: Number           // Preço em reais
+  nome: String,           // Product name
+  descricao: String,      // Detailed description
+  preco: Number           // Price in BRL
 }
 ```
 
-### Categoria
+### Category
 ```javascript
 {
-  nome: String,           // Nome da categoria
+  nome: String,           // Category name
   icone: String,          // Emoji
-  itens: Array<Produto>   // Lista de produtos
+  itens: Array<Produto>   // List of products
 }
 ```
 
-## 🐛 Troubleshooting
-
-### Áudio não funciona
-- Verificar se navegador suporta Web Speech API
-- Confirmar que som do sistema está ligado
-- Tentar em outro navegador (Chrome, Firefox, Edge)
-
-### Estilo não carrega
-- Verificar se `styles.css` está no mesmo diretório
-- Limpar cache do navegador (Ctrl+Shift+Delete)
-- Verificar console (F12) para erros
-
-### Produtos não aparecem
-- Confirmar que `produtos.json` existe
-- Verificar se está rodando em servidor local
-- Abrir console (F12) para ver erros
-
-## 📚 Referências sobre IHC
+## 📚 References on HCI
 
 - [Nielsen Norman Group - Accessibility](https://www.nngroup.com/articles/accessibility/)
 - [W3C - Web Accessibility Initiative](https://www.w3.org/WAI/)
 - [Web Speech API - MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
 
-## 📝 Autor
+## 🎓 About the Project
 
-Projeto acadêmico de Interação Humano-Computador (IHC) - UFSC
+This is an academic project developed for the **Human-Computer Interaction (HCI)** course at the **Federal University of Santa Catarina (UFSC)**.
 
-## 📄 Licença
+### 👥 Team
+- **Lucas Alexandre Machado** - [GitHub](https://github.com/LucasAlexandreMachado)
+- **Arthur Silveira Sampaio** - [GitHub](https://github.com/sampaio-arthur)
+- **Leonardo Latorre Boteon** - [GitHub](https://github.com/LeonardoBoteon)
 
-Código livre para uso educacional e comercial.
+## 📄 License
+
+Open-source code for educational and commercial use.
 
 ---
 
-**Desenvolvido com foco em: Acessibilidade, Usabilidade e Inclusão Digital** ♿✨
+**Developed with a focus on: Accessibility, Usability, and Digital Inclusion** ♿✨
