@@ -3,29 +3,38 @@
   "categorias": [
     {
       "nome": "Entradas",
+      "nome_en": "Starters",
       "emoji": "🥗",
       "itens": [
         {
           "nome": "Batata Frita",
+          "nome_en": "French Fries",
           "descricao": "Porção média crocante com sal temperado",
+          "descricao_en": "Medium crispy portion with seasoned salt",
           "preco": 15.0,
           "imagem": "img/entradas/fritas.jpg"
         },
         {
           "nome": "Onion Rings",
+          "nome_en": "Onion Rings",
           "descricao": "Anéis de cebola empanados e fritos",
+          "descricao_en": "Battered and fried onion rings",
           "preco": 17.0,
           "imagem": "img/entradas/onion-rings.jpg"
         },
         {
           "nome": "Isca de Frango",
+          "nome_en": "Chicken Strips",
           "descricao": "Tiras de frango grelhado com molho da casa",
+          "descricao_en": "Grilled chicken strips with house sauce",
           "preco": 22.0,
           "imagem": "img/entradas/iscas.jpg"
         },
         {
           "nome": "Bruschetta",
+          "nome_en": "Bruschetta",
           "descricao": "Pão italiano com tomate, manjericão e azeite",
+          "descricao_en": "Italian bread with tomato, basil and olive oil",
           "preco": 18.0,
           "imagem": "img/entradas/bruschetta.jpg"
         }
@@ -33,35 +42,46 @@
     },
     {
       "nome": "Pratos Principais",
+      "nome_en": "Main Dishes",
       "emoji": "🍔",
       "itens": [
         {
           "nome": "X-Burguer Classic",
+          "nome_en": "Classic Burger",
           "descricao": "Hambúrguer artesanal 180g com queijo, alface e tomate",
+          "descricao_en": "Artisan 180g burger with cheese, lettuce and tomato",
           "preco": 35.0,
           "imagem": "img/pratos/burger.jpg"
         },
         {
           "nome": "X-Bacon Duplo",
+          "nome_en": "Double Bacon Burger",
           "descricao": "Dois hambúrgueres 180g com bacon crocante e cheddar",
+          "descricao_en": "Two 180g patties with crispy bacon and cheddar",
           "preco": 45.0,
           "imagem": "img/pratos/x-bacon.jpg"
         },
         {
           "nome": "Frango Grelhado",
+          "nome_en": "Grilled Chicken",
           "descricao": "Filé de frango grelhado com batatas rústicas",
+          "descricao_en": "Grilled chicken fillet with rustic potatoes",
           "preco": 38.0,
           "imagem": "img/pratos/grelhado.jpg"
         },
         {
           "nome": "Wrap Vegetariano",
+          "nome_en": "Veggie Wrap",
           "descricao": "Tortilla com legumes salteados, guacamole e queijo",
+          "descricao_en": "Tortilla with sautéed vegetables, guacamole and cheese",
           "preco": 32.0,
           "imagem": "img/pratos/wrap.jpg"
         },
         {
           "nome": "Massa Carbonara",
+          "nome_en": "Carbonara Pasta",
           "descricao": "Penne ao molho carbonara com pancetta e parmesão",
+          "descricao_en": "Penne in carbonara sauce with pancetta and parmesan",
           "preco": 40.0,
           "imagem": "img/pratos/carbonara.jpg"
         }
@@ -69,35 +89,46 @@
     },
     {
       "nome": "Bebidas",
+      "nome_en": "Drinks",
       "emoji": "🥤",
       "itens": [
         {
           "nome": "Refrigerante",
+          "nome_en": "Soda",
           "descricao": "Lata 350ml - Coca-Cola, Guaraná ou Sprite",
+          "descricao_en": "350ml can - Coca-Cola, Guaraná or Sprite",
           "preco": 7.0,
           "imagem": "img/bebidas/refrigerante.jpg"
         },
         {
           "nome": "Suco Natural",
+          "nome_en": "Fresh Juice",
           "descricao": "Copo 400ml - Laranja, Maracujá ou Limão",
+          "descricao_en": "400ml cup - Orange, Passion Fruit or Lemon",
           "preco": 12.0,
           "imagem": "img/bebidas/suco.jpg"
         },
         {
           "nome": "Água Mineral",
+          "nome_en": "Mineral Water",
           "descricao": "Garrafa 500ml sem ou com gás",
+          "descricao_en": "500ml bottle still or sparkling",
           "preco": 5.0,
           "imagem": "img/bebidas/agua.jpg"
         },
         {
           "nome": "Milk-Shake",
+          "nome_en": "Milkshake",
           "descricao": "500ml - Chocolate, Morango ou Baunilha",
+          "descricao_en": "500ml - Chocolate, Strawberry or Vanilla",
           "preco": 18.0,
           "imagem": "img/bebidas/milkshake.jpg"
         },
         {
           "nome": "Chá Gelado",
+          "nome_en": "Iced Tea",
           "descricao": "Copo 400ml - Pêssego, Limão ou Morango",
+          "descricao_en": "400ml cup - Peach, Lemon or Strawberry",
           "preco": 9.0,
           "imagem": "img/bebidas/cha.jpg"
         }
@@ -105,29 +136,38 @@
     },
     {
       "nome": "Sobremesas",
+      "nome_en": "Desserts",
       "emoji": "🍰",
       "itens": [
         {
           "nome": "Brownie com Sorvete",
+          "nome_en": "Brownie with Ice Cream",
           "descricao": "Brownie quente com sorvete de creme e calda de chocolate",
+          "descricao_en": "Warm brownie with vanilla ice cream and chocolate sauce",
           "preco": 22.0,
           "imagem": "img/sobremesas/brownie.jpg"
         },
         {
           "nome": "Pudim de Leite",
+          "nome_en": "Milk Pudding",
           "descricao": "Fatia de pudim cremoso com calda de caramelo",
+          "descricao_en": "Slice of creamy pudding with caramel sauce",
           "preco": 14.0,
           "imagem": "img/sobremesas/pudim.jpg"
         },
         {
           "nome": "Petit Gateau",
+          "nome_en": "Petit Gateau",
           "descricao": "Bolinho de chocolate quente com sorvete de creme",
+          "descricao_en": "Warm chocolate lava cake with vanilla ice cream",
           "preco": 25.0,
           "imagem": "img/sobremesas/petit-gateau.jpg"
         },
         {
           "nome": "Cheesecake",
+          "nome_en": "Cheesecake",
           "descricao": "Fatia de cheesecake com calda de frutas vermelhas",
+          "descricao_en": "Cheesecake slice with mixed berry sauce",
           "preco": 20.0,
           "imagem": "img/sobremesas/cheesecake.jpg"
         }
